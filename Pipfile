@@ -1,0 +1,35 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+alembic = "*"
+aniso8601 = "*"
+click = "*"
+flask = "*"
+flask-migrate = "*"
+flask-restful = "*"
+flask-sqlalchemy = "*"
+gunicorn = "*"
+honcho = "*"
+importlib-metadata = "*"
+importlib-resources = "*"
+itsdangerous = "*"
+jinja2 = "*"
+mako = "*"
+markupsafe = "*"
+psycopg2 = "*"
+python-dotenv = "*"
+pytz = "*"
+setuptools = "*"
+six = "*"
+sqlalchemy = "*"
+sqlalchemy-serializer = "*"
+werkzeug = "*"
+
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
