@@ -13,7 +13,9 @@ class Product(db.Model):
     __tablename__ = 'products'
 
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String, nullable=False)
+    name = db.Column(db.Integer)
+    description = db.Column(db.String(255), nullable=False)
+    image_url = db.Column(db.VARCHAR(255))
     price= db.Column(db.Integer,nullable=False)
     onstock = db.Column(db.String, nullable=False)
     rating= db.Column(db.Integer,nullable=False)
@@ -51,8 +53,8 @@ class User(db.Model):
     password = db.Column(db.String, nullable=False)
 
     shopping_cart = db.relationship('ShoppingCart', back_populates='user', uselist=False)
-    reviews = db.relationship('Review', back_populates='user')
-    receipts = db.relationship('Receipt', back_populates='user')
+    reviews = db.relationship('Review', back_populates='user', overlaps="review")
+    receipts = db.relationship('Receipt', back_populates='user', overlaps="receipts")
 
     def __repr__(self):
         return f"User.... Username:{self.username} \n Email:{self.email} \n Phone number: {self.phone} \n  Password: {self.password} "
@@ -86,3 +88,5 @@ class Receipt(db.Model):
     def __repr__(self):
         return f"Receipt: Username: {self.username} \n Phone: {self.phone} \n Shipping Details: {self.shipping_details} \n Delivery address: {self.delivery_address}"
 
+#  relationship 'User.receipt' will copy column users.id to column receipts.user_id, which conflicts with relationship(s): 'User.receipts' (copies users.id to receipts.user_id). If this is not the intention, consider if these relationships should be linked with back_populates, or if viewonly=True should be applied to one or more if they are read-only. For the less common case that foreign key constraints are partially overlapping, the orm.foreign() annotation can be used to isolate the columns that should be written towards.   To silence this warning, add the parameter 'overlaps="receipts"' to the 'User.receipt' relationship. (Background on this warning at: https://sqlalche.me/e/20/qzyx) (This warning originated from the `configure_mappers()` process, which was invoked automatically in response to a user-initiated operation.)
+#   return cls.que
