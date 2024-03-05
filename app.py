@@ -8,7 +8,7 @@ import os
 # load_dotenv()
 
 
-from models import db
+from models import db, Product
 
 app = Flask(
     __name__,
@@ -29,20 +29,20 @@ def home():
 
 @app.route("/products" ,methods=["GET"])
 def get_products():
-    pass
-    # products = Products.query.all()
-    # products_list = []
-    # for product in products:
-    #     product_dict ={
-    #         product.name,
-    #         product.image,
-    #         product.quantity,
-    #         product.price,
+    products = Product.query.all()
+    products_list = []
+    for product in products:
+        product_dict ={
+            "id": product.id,
+            "description": product.description,
+            "price": product.price,
+            "onstock": product.onstock,
+            "rating": product.rating,
             
-    #     }
-    #     products_list.append(product_dict)
-    #     response = make_response(jsonify(products_list),200)
-    # return response 
+        }
+        products_list.append(product_dict)
+    response = make_response(jsonify(products_list),200)
+    return response 
 @app.route("/products/<int:id>",methods=[ "GET"] )
 def get_shop(id):
     pass

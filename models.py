@@ -22,7 +22,7 @@ class Product(db.Model):
     reviews= db.relationship('Review', backref= 'product')
 
     def __repr__(self):
-        return f"Product: Description: {self.dezcription} \n Price: {self.price} \n Stock: {self.onstock} \n Rating: {self.rating}"
+        return f"Product: Description: {self.description} \n Price: {self.price} \n Stock: {self.onstock} \n Rating: {self.rating}"
 
 
 class Review(db.Model):
@@ -35,9 +35,10 @@ class Review(db.Model):
 
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    user = db.relationship('User', backref='review')
 
     def __repr__(self):
-        return f"Review: {self.dezcription} \n Rating:{self.rating} \n Posted: {self.created_at}"
+        return f"Review: {self.description} \n Rating:{self.rating} \n Posted: {self.created_at}"
 
 
 class User(db.Model):
@@ -80,7 +81,7 @@ class Receipt(db.Model):
     created_at= db.Column(db.DateTime, nullable=False, server_default=db.func.now())
     
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-
+    user = db.relationship('User', backref='receipt')
 
     def __repr__(self):
         return f"Receipt: Username: {self.username} \n Phone: {self.phone} \n Shipping Details: {self.shipping_details} \n Delivery address: {self.delivery_address}"
