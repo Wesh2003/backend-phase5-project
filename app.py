@@ -76,6 +76,18 @@ def delete_product(id):
     # return jsonify ({"message":"product deleted  well"}),200
 
 
+# @app.route("/" ,methods=["GET"])
+# @app.route("/shoppingcart" ,methods=["POST"])
+# @app.route("/shoppingcart" ,methods=["GET"])
+# @app.route("/shoppingcart" ,methods=["DELETE"])
+# @app.route("/wishlist" ,methods=["POST"])
+# @app.route("/wishlist" ,methods=["DELETE"])
+# @app.route("/wishlist" ,methods=["GET"])
+# @app.route("/favourites" ,methods=["POST"])
+# @app.route("/favourites" ,methods=["DELETE"])
+# @app.route("/favourites" ,methods=["GET"])
+
+
 
 if __name__ == '__main__':
     app.run(port = 5555, debug = True)
