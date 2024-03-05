@@ -44,25 +44,30 @@ def get_products():
     response = make_response(jsonify(products_list),200)
     return response 
 
-@app.route("/products/<int:id>",methods=[ "GET"] )
-def get_shop(id):
-    pass
-    # product = Products.query.get(id)
-    # if product:
-    #     product_dict={
-    #         "id": product.id,
-    #         "username": product.username,
-    #         "shopname": product.shopname,
-    #         "address": product.address,
-    #         "contact": product.contact,
+@app.route('/favorites', methods=['POST'])
+@jwt_requires()
+def add_to_favorites():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
 
-    #     }
-    #     response = make_response(jsonify(product_dict), 200)
+    product_id = request.json.get('product_id')
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify({'error': 'Product not found'}), 404    
+    
+    if Favorite.query.filter_by(user_id=user.id, product_id=product.id).first():
+        return jsonify({'message': 'Product already in favorites'}), 400
 
-    #     return response
-    # else:
-    #     response = {"error": "id not found"}
-    #     return jsonify(response), 404
+    # Add product to user's favorites
+    favorite = Favorite(user_id=user.id, product_id=product.id)
+    db.session.add(favorite)
+    db.session.commit()
+
+    return jsonify({'message': 'Product added to favorites successfully'}), 201
+
+    
     
 
 
