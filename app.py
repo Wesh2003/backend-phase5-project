@@ -43,6 +43,7 @@ def get_products():
         products_list.append(product_dict)
     response = make_response(jsonify(products_list),200)
     return response 
+
 @app.route("/products/<int:id>",methods=[ "GET"] )
 def get_shop(id):
     pass
@@ -63,17 +64,6 @@ def get_shop(id):
     #     response = {"error": "id not found"}
     #     return jsonify(response), 404
     
-@app.route("/products/<int:id>" , methods=['DELETE'])
-def delete_product(id):
-    pass
-    # product = Products.query.get(id)
-    # if not product:
-    #     return jsonify({"error":"product not found"}),404
-    # else:
-        
-    #    db.session.delete(product)
-    #    db.session.commit()
-    # return jsonify ({"message":"product deleted  well"}),200
 
 
 # @app.route("/" ,methods=["GET"])
@@ -86,6 +76,11 @@ def delete_product(id):
 # @app.route("/favourites" ,methods=["POST"])
 # @app.route("/favourites" ,methods=["DELETE"])
 # @app.route("/favourites" ,methods=["GET"])
+# @app.route("/reviews" ,methods=["POST"])
+# @app.route("/reviews" ,methods=["DELETE"])
+# @app.route("/reviews" ,methods=["GET"])
+
+
 
 
 
