@@ -8,7 +8,7 @@ import os
 # load_dotenv()
 
 
-from models import db, Product
+from models import db, Product,Review
 
 app = Flask(
     __name__,
@@ -76,11 +76,99 @@ def get_shop(id):
 # @app.route("/favourites" ,methods=["POST"])
 # @app.route("/favourites" ,methods=["DELETE"])
 # @app.route("/favourites" ,methods=["GET"])
-# @app.route("/reviews" ,methods=["POST"])
-# @app.route("/reviews" ,methods=["DELETE"])
-# @app.route("/reviews" ,methods=["GET"])
+@app.route('/reviews', methods=['GET'])
+def get_reviews():
+    reviews = Review.query.all()
+    review_list = []
+    for review in reviews:
+        review_dic={
+            'id': review.id,
+            'description': review.description,
+            'rating': review.rating,
+            'created_at': review.created_at,
+            'product_id': review.product_id,
+            'user_id': review.user_id
+        }
+        review_list.append(review_dic)
+    ans = make_response(jsonify(review_list),200)
+    return ans
+
+@app.route("/reviews", methods=["POST"])
+def create_review():
+    data = request.json
+    description = data.get("description")
+    rating = data.get("rating")
+    product_id = data.get("product_id")
+    user_id = data.get("user_id")
+    
+    if not all([description, rating, product_id, user_id]):
+        return jsonify({"error": "Missing fields!"}), 400
+
+    # Create a new review object
+    new_review = Review(
+        description=description,
+        rating=rating,
+        product_id=product_id,
+        user_id=user_id
+    )
+
+    db.session.add(new_review)
+    db.session.commit()
+
+    review_details = {
+        "id": new_review.id,
+        "description": new_review.description,
+        "rating": new_review.rating,
+        "created_at": new_review.created_at.isoformat(),
+        "product_id": new_review.product_id,
+        "user_id": new_review.user_id
+    }
+
+    ans = make_response(jsonify(review_details),200)
+    return ans
+        
+       
+         
+
+@app.route('/reviews/<int:review_id>', methods=['DELETE'])
+def delete_review(review_id):
+    review = Review.query.get(review_id)
+    if review:
+        db.session.delete(review)
+        db.session.commit()
+        return jsonify(message='Review deleted successfully'), 200
+    else:
+        return jsonify(message='Review not found'), 404
 
 
+@app.route("/reviews/<int:review_id>", methods=["PATCH"])
+def update_review(review_id):
+    data = request.json
+    description = data.get("description")
+    rating = data.get("rating")
+
+    review = Review.query.get(review_id)
+    if not review:
+        return jsonify({"error": "Review not found"}), 404
+
+    if description:
+        review.description = description
+    if rating:
+        review.rating = rating
+
+    db.session.commit()
+
+    review_details = {
+        "id": review.id,
+        "description": review.description,
+        "rating": review.rating,
+        "created_at": review.created_at.isoformat(),
+        "product_id": review.product_id,
+        "user_id": review.user_id
+    }
+    ans = make_response(jsonify(review_details))
+    return ans
+    
 
 
 
