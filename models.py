@@ -18,6 +18,8 @@ class Product(db.Model):
     onstock = db.Column(db.String, nullable=False)
     rating= db.Column(db.Integer,nullable=False)
 
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
+
     shoppingcarts= db.relationship('ShoppingCart', backref= 'product')
     reviews= db.relationship('Review', backref= 'product')
 
@@ -86,3 +88,38 @@ class Receipt(db.Model):
     def __repr__(self):
         return f"Receipt: Username: {self.username} \n Phone: {self.phone} \n Shipping Details: {self.shipping_details} \n Delivery address: {self.delivery_address}"
 
+class Favourite(db.Model):
+    __tablename__="favourites"
+
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String, nullable=False)
+    price= db.Column(db.Integer,nullable=False)
+    onstock = db.Column(db.String, nullable=False)
+    rating= db.Column(db.Integer,nullable=False)
+
+    def __repr__(self):
+        return f"Favourite : Description: {self.description} \n Price: {self.price} \n Stock: {self.onstock} \n Rating: {self.rating}"
+
+
+class Wishlist(db.Model):
+    __tablename__="wishlists"
+
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String, nullable=False)
+    price= db.Column(db.Integer,nullable=False)
+    onstock = db.Column(db.String, nullable=False)
+    rating= db.Column(db.Integer,nullable=False)
+
+    def __repr__(self):
+        return f"Wishlist : Description: {self.description} \n Price: {self.price} \n Stock: {self.onstock} \n Rating: {self.rating}"
+
+class Category(db.Model):
+    __tablename__="categories"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+
+    products = db.relationship('Product', backref= 'category')
+
+    def __repr__(self):
+        return f"Category : Name: {self.name}"
