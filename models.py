@@ -119,9 +119,10 @@ class Category(db.Model):
     __tablename__="categories"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=False)
+    category = db.Column(db.String, nullable=False)
+    description = db.Column(db.String, nullable=False)
 
     products = db.relationship('Product', backref= 'category')
 
     def __repr__(self):
-        return f"Category : Name: {self.name}"
+        return f"Category : Name: {self.category}"

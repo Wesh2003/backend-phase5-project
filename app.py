@@ -45,7 +45,7 @@ def get_products():
     return response 
 
 @app.route('/favorites', methods=['POST'])
-@jwt_requires()
+# @jwt_requires()
 def add_to_favorites():
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
