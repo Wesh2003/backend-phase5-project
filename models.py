@@ -20,6 +20,8 @@ class Product(db.Model):
     onstock = db.Column(db.String, nullable=False)
     rating= db.Column(db.Integer,nullable=False)
 
+    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
+
     shoppingcarts= db.relationship('ShoppingCart', backref= 'product')
     reviews= db.relationship('Review', backref= 'product')
 
@@ -88,5 +90,39 @@ class Receipt(db.Model):
     def __repr__(self):
         return f"Receipt: Username: {self.username} \n Phone: {self.phone} \n Shipping Details: {self.shipping_details} \n Delivery address: {self.delivery_address}"
 
-#  relationship 'User.receipt' will copy column users.id to column receipts.user_id, which conflicts with relationship(s): 'User.receipts' (copies users.id to receipts.user_id). If this is not the intention, consider if these relationships should be linked with back_populates, or if viewonly=True should be applied to one or more if they are read-only. For the less common case that foreign key constraints are partially overlapping, the orm.foreign() annotation can be used to isolate the columns that should be written towards.   To silence this warning, add the parameter 'overlaps="receipts"' to the 'User.receipt' relationship. (Background on this warning at: https://sqlalche.me/e/20/qzyx) (This warning originated from the `configure_mappers()` process, which was invoked automatically in response to a user-initiated operation.)
-#   return cls.que
+class Favourite(db.Model):
+    __tablename__="favourites"
+
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String, nullable=False)
+    price= db.Column(db.Integer,nullable=False)
+    onstock = db.Column(db.String, nullable=False)
+    rating= db.Column(db.Integer,nullable=False)
+
+    def __repr__(self):
+        return f"Favourite : Description: {self.description} \n Price: {self.price} \n Stock: {self.onstock} \n Rating: {self.rating}"
+
+
+class Wishlist(db.Model):
+    __tablename__="wishlists"
+
+    id = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String, nullable=False)
+    price= db.Column(db.Integer,nullable=False)
+    onstock = db.Column(db.String, nullable=False)
+    rating= db.Column(db.Integer,nullable=False)
+
+    def __repr__(self):
+        return f"Wishlist : Description: {self.description} \n Price: {self.price} \n Stock: {self.onstock} \n Rating: {self.rating}"
+
+class Category(db.Model):
+    __tablename__="categories"
+
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String, nullable=False)
+    description = db.Column(db.String, nullable=False)
+
+    products = db.relationship('Product', backref= 'category')
+
+    def __repr__(self):
+        return f"Category : Name: {self.category}"
