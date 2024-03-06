@@ -13,7 +13,9 @@ class Product(db.Model):
     __tablename__ = 'products'
 
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String, nullable=False)
+    name = db.Column(db.Integer)
+    description = db.Column(db.String(255), nullable=False)
+    image_url = db.Column(db.VARCHAR(255))
     price= db.Column(db.Integer,nullable=False)
     onstock = db.Column(db.String, nullable=False)
     rating= db.Column(db.Integer,nullable=False)
@@ -53,8 +55,8 @@ class User(db.Model):
     password = db.Column(db.String, nullable=False)
 
     shopping_cart = db.relationship('ShoppingCart', back_populates='user', uselist=False)
-    reviews = db.relationship('Review', back_populates='user')
-    receipts = db.relationship('Receipt', back_populates='user')
+    reviews = db.relationship('Review', back_populates='user', overlaps="review")
+    receipts = db.relationship('Receipt', back_populates='user', overlaps="receipts")
 
     def __repr__(self):
         return f"User.... Username:{self.username} \n Email:{self.email} \n Phone number: {self.phone} \n  Password: {self.password} "
