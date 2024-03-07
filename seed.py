@@ -1,5 +1,5 @@
 from app import app, db
-from models import Product
+from models import Product, User, Wishlist
 import random
 
 def seed_products(category_name, product_list, min_products, max_products, descriptions=None, image_urls=None):
@@ -164,4 +164,8 @@ if __name__ == "__main__":
         for category, details in categories.items():
             seed_products(category, **details)
 
-        print("Database seeding complete.")
+        print("Database seeding complete.")     
+
+
+    
+    
