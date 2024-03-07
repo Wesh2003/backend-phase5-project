@@ -2,6 +2,8 @@ from flask import Flask, make_response, request, jsonify, render_template
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 from werkzeug.exceptions import NotFound
+from models import db, User, ShoppingCart, Receipt, Category, Wishlist
+from auth import Auth
 import os
 # from flask_Bcrypt import Bcrypt
 # from dotenv import load_dotenv
@@ -26,6 +28,47 @@ api= Api(app)
 @app.route("/")
 def home():
     return 'hello world'
+
+class Users(Resource):
+    def get(self):
+        users = User.query.all()
+        response = [{'id': user.id, 'name': user.name ,'email': user.email} for user in users]
+        return make_response(jsonify(response))
+
+@app.route('/users/<int:id>', methods=['GET'])
+def user_by_id(id):
+    user = User.query.get(id)
+    try:
+        if user:
+            response = [{
+            "name": user.name, "id": user.id, "email": user.email
+            }]
+        return jsonify(response), 200
+    except:
+            response = {"error": "No such user"}
+            return jsonify(response), 404
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+
+   
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password')
+
+    if not name or not email or not password:
+        return jsonify({"error": "Incomplete or incorrect data provided"}), 400
+
+    user = User.query.filter_by(name=name).first()  
+    if not user:
+        user = User(name=name, email=email)
+        Auth.set_password(user, password)
+        db.session.add(user)
+        db.session.commit()
+
+        return jsonify({"message": "User registered successfully"}), 201
+    else:
+        return jsonify({"message": "User already registered"}), 400
 
 @app.route("/products" ,methods=["GET"])
 def get_products():
@@ -72,15 +115,14 @@ def add_to_favorites():
 
 
 # @app.route("/" ,methods=["GET"])
+# 
 # @app.route("/shoppingcart" ,methods=["POST"])
 # @app.route("/shoppingcart" ,methods=["GET"])
 # @app.route("/shoppingcart" ,methods=["DELETE"])
 # @app.route("/wishlist" ,methods=["POST"])
 # @app.route("/wishlist" ,methods=["DELETE"])
 # @app.route("/wishlist" ,methods=["GET"])
-# @app.route("/favourites" ,methods=["POST"])
-# @app.route("/favourites" ,methods=["DELETE"])
-# @app.route("/favourites" ,methods=["GET"])
+
 @app.route('/reviews', methods=['GET'])
 def get_reviews():
     reviews = Review.query.all()
@@ -214,7 +256,7 @@ def delete_shopping_cart_item(id):
 
     
 
-
+api.add_resource(Users, "/users")
 
 if __name__ == '__main__':
     app.run(port = 5555, debug = True)

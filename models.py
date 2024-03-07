@@ -66,6 +66,26 @@ class ShoppingCart(db.Model):
 
     user = relationship('User', back_populates='shopping_cart')
 
+    def __repr__(self):
+        return f"ShoppingCart(ID: {self.id})"
+    
+class Wishlist(db.Model):
+    __tablename__= "wishlists"
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+
+    user = relationship('User', back_populates='shopping_cart')
+    wishlists = relationship('wishlist', back_populates='user', uselist=False)  
+
+    
+
+class Admin(db.Model):
+    __tablename__ = 'admins'
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String)
+    password = db.Column(db.String)
     def to_dict(self):
         return {
             'id': self.id,
