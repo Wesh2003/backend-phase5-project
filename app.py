@@ -87,9 +87,12 @@ def get_products():
     response = make_response(jsonify(products_list),200)
     return response 
 
-@app.route('/favorites', methods=['POST'])
-# @jwt_requires()
-def add_to_favorites():
+
+@app.route('/favourites', methods=['POST'])
+@jwt_required()
+def add_to_favourites():
+
+
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
     if not user:
@@ -100,16 +103,52 @@ def add_to_favorites():
     if not product:
         return jsonify({'error': 'Product not found'}), 404    
     
-    if Favorite.query.filter_by(user_id=user.id, product_id=product.id).first():
-        return jsonify({'message': 'Product already in favorites'}), 400
+    if Favourite.query.filter_by(user_id=user.id, product_id=product.id).first():
+        return jsonify({'message': 'Product already in favourites'}), 400
 
     # Add product to user's favorites
-    favorite = Favorite(user_id=user.id, product_id=product.id)
-    db.session.add(favorite)
+    favourite = Favourite(user_id=user.id, product_id=product.id)
+    db.session.add(favourite)
     db.session.commit()
 
-    return jsonify({'message': 'Product added to favorites successfully'}), 201
+    return jsonify({'message': 'Product added to favourites successfully'}), 201
 
+
+@app.route('/favourites/remove', methods=['DELETE'])
+@jwt_required()
+def remove_from_favourites():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    product_id = request.json.get('product_id')
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify({'error': 'Product not found'}), 404
+
+    favourite = Favourite.query.filter_by(user_id=user.id, product_id=product.id).first()
+    if not favourite:
+        return jsonify({'message': 'Product not in favourites'}), 400
+
+    # Remove product from user's favourites
+    db.session.delete(favourite)
+    db.session.commit()
+
+    return jsonify({'message': 'Product removed from favourites successfully'}), 200
+
+@app.route('/favourites', methods=['GET'])
+@jwt_required()
+def get_favourite_products():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    favourites = Favourite.query.filter_by(user_id=user.id).all()
+    favourite_products = [{'id': fav.product_id, 'name': fav.product.name} for fav in favourites]
+
+    return jsonify({'favourites': favourite_products}), 200
     
     
 
