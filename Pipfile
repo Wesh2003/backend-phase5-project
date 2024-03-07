@@ -27,7 +27,7 @@ six = "*"
 sqlalchemy = "*"
 sqlalchemy-serializer = "*"
 werkzeug = "*"
-
+bcrypt = "*"
 
 [dev-packages]
 

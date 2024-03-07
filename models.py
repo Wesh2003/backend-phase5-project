@@ -10,6 +10,7 @@ class Product(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)  # Ensure a consistent length
+    name = db.Column(db.String)
     description = db.Column(db.String(255), nullable=False)
     image_url = db.Column(db.String(255))  # Use db.String for consistency
     price = db.Column(db.Integer, nullable=False)
@@ -65,8 +66,38 @@ class ShoppingCart(db.Model):
 
     user = relationship('User', back_populates='shopping_cart')
 
-    def __repr__(self):
-        return f"ShoppingCart(ID: {self.id})"
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'product_id': self.product_id,
+            'user_id': self.user_id
+            # Add more attributes if needed
+        }
+    
+class Wishlist(db.Model):
+    __tablename__= "wishlists"
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+
+    user = relationship('User', back_populates='shopping_cart')
+    wishlists = relationship('wishlist', back_populates='user', uselist=False)  
+
+    
+
+class Admin(db.Model):
+    __tablename__ = 'admins'
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String)
+    password = db.Column(db.String)
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'product_id': self.product_id,
+            'user_id': self.user_id
+            # Add more attributes if needed
+        }
 
 class Receipt(db.Model):
     __tablename__ = "receipts"
@@ -76,7 +107,7 @@ class Receipt(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    user = relationship('User', back_populates='receipts')
+    user = db.relationship('User', back_populates='receipts')
 
     def __repr__(self):
         return f"Receipt(ID: {self.id}, Details: {self.details}, Date: {self.created_at})"
