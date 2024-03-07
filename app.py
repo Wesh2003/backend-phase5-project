@@ -32,7 +32,7 @@ def home():
 class Users(Resource):
     def get(self):
         users = User.query.all()
-        response = [{'id': user.id, 'name': user.name ,'email': user.email} for user in users]
+        response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
         return make_response(jsonify(response))
 
 @app.route('/users/<int:id>', methods=['GET'])
@@ -41,7 +41,7 @@ def user_by_id(id):
     try:
         if user:
             response = [{
-            "name": user.name, "id": user.id, "email": user.email
+            "name": user.name, "id": user.id, "email": user.email , "phone": user.phone
             }]
         return jsonify(response), 200
     except:
@@ -55,13 +55,14 @@ def register():
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
+    phone = data.get('phone')
 
     if not name or not email or not password:
         return jsonify({"error": "Incomplete or incorrect data provided"}), 400
 
     user = User.query.filter_by(name=name).first()  
     if not user:
-        user = User(name=name, email=email)
+        user = User(name=name, email=email, phone=phone)
         Auth.set_password(user, password)
         db.session.add(user)
         db.session.commit()

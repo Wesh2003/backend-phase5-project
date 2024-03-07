@@ -45,14 +45,15 @@ class User(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(128), nullable=False)
+    name = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(128), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)  # Use string for phone numbers
+    phone = db.Column(db.Integer, nullable=False)  # Use string for phone numbers
     password = db.Column(db.String(128), nullable=False)  # Assume hashed password
 
     shopping_cart = relationship('ShoppingCart', back_populates='user', uselist=False)  # Assume one shopping cart per user
     receipts = relationship('Receipt', back_populates='user')
-
+    # wishlists = relationship('wishlist', back_populates='user')  
+    
     def __repr__(self):
         return f"User(ID: {self.id}, Username: {self.username})"
 
@@ -74,8 +75,7 @@ class Wishlist(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
-    user = relationship('User', back_populates='shopping_cart')
-    wishlists = relationship('wishlist', back_populates='user', uselist=False)  
+    # user = relationship('User', back_populates='wishlists')
 
     
 
