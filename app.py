@@ -46,9 +46,9 @@ def get_products():
     response = make_response(jsonify(products_list),200)
     return response 
 
-@app.route('/favourites', methods=['POST'])
-@jwt_required()
-def add_to_favourites():
+@app.route('/favorites', methods=['POST'])
+# @jwt_requires()
+def add_to_favorites():
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
     if not user:
