@@ -10,7 +10,7 @@ import os
 # load_dotenv()
 
 
-from models import db, Product,Review
+from models import db, Product,Review,ShoppingCart
 
 app = Flask(
     __name__,
@@ -88,9 +88,12 @@ def get_products():
     response = make_response(jsonify(products_list),200)
     return response 
 
-@app.route('/favorites', methods=['POST'])
-# @jwt_requires()
-def add_to_favorites():
+
+@app.route('/wishlists', methods=['POST'])
+@jwt_required()
+def add_to_wishlists():
+
+
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
     if not user:
@@ -101,16 +104,51 @@ def add_to_favorites():
     if not product:
         return jsonify({'error': 'Product not found'}), 404    
     
-    if Favorite.query.filter_by(user_id=user.id, product_id=product.id).first():
-        return jsonify({'message': 'Product already in favorites'}), 400
+    if Wishlist.query.filter_by(user_id=user.id, product_id=product.id).first():
+        return jsonify({'message': 'Product already in wishlists'}), 400
 
-    # Add product to user's favorites
-    favorite = Favorite(user_id=user.id, product_id=product.id)
-    db.session.add(favorite)
+    # Add product to user's wishlists
+    db.session.add(wishlist)
     db.session.commit()
 
-    return jsonify({'message': 'Product added to favorites successfully'}), 201
+    return jsonify({'message': 'Product added to wishlists successfully'}), 201
 
+
+@app.route('/wishlists/remove', methods=['DELETE'])
+@jwt_required()
+def remove_from_wishlists():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    product_id = request.json.get('product_id')
+    product = Product.query.get(product_id)
+    if not product:
+        return jsonify({'error': 'Product not found'}), 404
+
+    wishlist = Wishlist.query.filter_by(user_id=user.id, product_id=product.id).first()
+    if not wishlist:
+        return jsonify({'message': 'Product not in wishlists'}), 400
+
+    # Remove product from user's wishlists
+    db.session.delete(wishlist)
+    db.session.commit()
+
+    return jsonify({'message': 'Product removed from wishlists successfully'}), 200
+
+@app.route('/wishlists', methods=['GET'])
+@jwt_required()
+def get_wishlist_products():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    wishlists = Wishlist.query.filter_by(user_id=user.id).all()
+    wishlist_products = [{'id': wish.product_id, 'name': wish.product.name} for wish in wishlists]
+
+    return jsonify({'wishlists': wishlist_products}), 200
     
     
 
@@ -216,6 +254,45 @@ def update_review(review_id):
     }
     ans = make_response(jsonify(review_details))
     return ans
+
+
+
+@app.route("/shoppingcart" ,methods=["POST"])
+def  add_to_cart():
+    data = request.get_json()
+    product_id = data.get('product_id')
+    user_id = data.get('user_id')
+
+    try:
+        new_cart_item = ShoppingCart(product_id = product_id, user_id = user_id)
+        db.session.add(new_cart_item)
+        db.session.commit()
+
+        new_cart_item_dict = new_cart_item.to_dict()
+        response = make_response(jsonify(new_cart_item_dict), 200)
+        return response 
+    
+    except Exception as e:
+        response = make_response({'error': str(e)}, 400)
+        return response
+    
+@app.route("/shoppingcart" ,methods=["GET"])
+def display_products_in_cart():
+    all_shopping_cart_items = ShoppingCart.query.all()
+    shopping_cart_items_dict = [item.to_dict() for item in all_shopping_cart_items]
+    response = make_response(jsonify(shopping_cart_items_dict), 200)
+    return response 
+
+@app.route("/shoppingcart/<int:id>" ,methods=["DELETE"])
+def delete_shopping_cart_item(id):
+    item = ShoppingCart.query.filter_by(id=id).first()
+    db.session.delete(item)
+    db.session.commit()
+    response =  make_response("Item deleted", 200)
+    return response  
+
+
+
     
 
 api.add_resource(Users, "/users")
