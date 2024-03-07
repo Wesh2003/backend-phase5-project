@@ -2,7 +2,7 @@ from flask import Flask, make_response, request, jsonify, render_template
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 from werkzeug.exceptions import NotFound
-#from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 import os
 # from flask_Bcrypt import Bcrypt
 # from dotenv import load_dotenv
@@ -18,7 +18,7 @@ app = Flask(
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shoppingDatabase.db'
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-#jwt = JWTManager(app)
+jwt = JWTManager(app)
 
 migrate = Migrate(app, db)
 
@@ -46,9 +46,9 @@ def get_products():
     response = make_response(jsonify(products_list),200)
     return response 
 
-@app.route('/favorites', methods=['POST'])
-#@jwt_required()
-def add_to_favorites():
+@app.route('/favourites', methods=['POST'])
+@jwt_required()
+def add_to_favourites():
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
     if not user:
@@ -59,12 +59,12 @@ def add_to_favorites():
     if not product:
         return jsonify({'error': 'Product not found'}), 404    
     
-    if Favorite.query.filter_by(user_id=user.id, product_id=product.id).first():
+    if Favourite.query.filter_by(user_id=user.id, product_id=product.id).first():
         return jsonify({'message': 'Product already in favorites'}), 400
 
     # Add product to user's favorites
-    favorite = Favorite(user_id=user.id, product_id=product.id)
-    db.session.add(favorite)
+    favorite = Favourite(user_id=user.id, product_id=product.id)
+    db.session.add(favourite)
     db.session.commit()
 
     return jsonify({'message': 'Product added to favorites successfully'}), 201
