@@ -88,9 +88,9 @@ def get_products():
     return response 
 
 
-@app.route('/favourites', methods=['POST'])
+@app.route('/wishlists', methods=['POST'])
 @jwt_required()
-def add_to_favourites():
+def add_to_wishlists():
 
 
     current_user_id = get_jwt_identity()
@@ -103,20 +103,19 @@ def add_to_favourites():
     if not product:
         return jsonify({'error': 'Product not found'}), 404    
     
-    if Favourite.query.filter_by(user_id=user.id, product_id=product.id).first():
-        return jsonify({'message': 'Product already in favourites'}), 400
+    if Wishlist.query.filter_by(user_id=user.id, product_id=product.id).first():
+        return jsonify({'message': 'Product already in wishlists'}), 400
 
-    # Add product to user's favorites
-    favourite = Favourite(user_id=user.id, product_id=product.id)
-    db.session.add(favourite)
+    # Add product to user's wishlists
+    db.session.add(wishlist)
     db.session.commit()
 
-    return jsonify({'message': 'Product added to favourites successfully'}), 201
+    return jsonify({'message': 'Product added to wishlists successfully'}), 201
 
 
-@app.route('/favourites/remove', methods=['DELETE'])
+@app.route('/wishlists/remove', methods=['DELETE'])
 @jwt_required()
-def remove_from_favourites():
+def remove_from_wishlists():
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
     if not user:
@@ -127,28 +126,28 @@ def remove_from_favourites():
     if not product:
         return jsonify({'error': 'Product not found'}), 404
 
-    favourite = Favourite.query.filter_by(user_id=user.id, product_id=product.id).first()
-    if not favourite:
-        return jsonify({'message': 'Product not in favourites'}), 400
+    wishlist = Wishlist.query.filter_by(user_id=user.id, product_id=product.id).first()
+    if not wishlist:
+        return jsonify({'message': 'Product not in wishlists'}), 400
 
-    # Remove product from user's favourites
-    db.session.delete(favourite)
+    # Remove product from user's wishlists
+    db.session.delete(wishlist)
     db.session.commit()
 
-    return jsonify({'message': 'Product removed from favourites successfully'}), 200
+    return jsonify({'message': 'Product removed from wishlists successfully'}), 200
 
-@app.route('/favourites', methods=['GET'])
+@app.route('/wishlists', methods=['GET'])
 @jwt_required()
-def get_favourite_products():
+def get_wishlist_products():
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
-    favourites = Favourite.query.filter_by(user_id=user.id).all()
-    favourite_products = [{'id': fav.product_id, 'name': fav.product.name} for fav in favourites]
+    wishlists = Wishlist.query.filter_by(user_id=user.id).all()
+    wishlist_products = [{'id': wish.product_id, 'name': wish.product.name} for wish in wishlists]
 
-    return jsonify({'favourites': favourite_products}), 200
+    return jsonify({'wishlists': wishlist_products}), 200
     
     
 
