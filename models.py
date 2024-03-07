@@ -13,7 +13,7 @@ class Product(db.Model):
     __tablename__ = 'products'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Integer)
+    name = db.Column(db.String)
     description = db.Column(db.String(255), nullable=False)
     image_url = db.Column(db.VARCHAR(255))
     price= db.Column(db.Integer,nullable=False)
@@ -85,7 +85,7 @@ class Receipt(db.Model):
     created_at= db.Column(db.DateTime, nullable=False, server_default=db.func.now())
     
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
-    user = db.relationship('User', backref='receipt')
+    user = db.relationship('User', back_populates='receipts')
 
     def __repr__(self):
         return f"Receipt: Username: {self.username} \n Phone: {self.phone} \n Shipping Details: {self.shipping_details} \n Delivery address: {self.delivery_address}"
