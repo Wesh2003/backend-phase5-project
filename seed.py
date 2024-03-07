@@ -43,7 +43,7 @@ if __name__ == "__main__":
     'https://images.pexels.com/photos/3764571/pexels-photo-3764571.jpeg?auto=compress&cs=tinysrgb&w=600'
 ]
 
-           ,
+            },
             "Trousers": {
             "product_list": ['trouser'],
             "min_products": 5,
