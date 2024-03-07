@@ -66,8 +66,13 @@ class ShoppingCart(db.Model):
 
     user = relationship('User', back_populates='shopping_cart')
 
-    def __repr__(self):
-        return f"ShoppingCart(ID: {self.id})"
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'product_id': self.product_id,
+            'user_id': self.user_id
+            # Add more attributes if needed
+        }
     
 class Wishlist(db.Model):
     __tablename__= "wishlists"
