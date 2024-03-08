@@ -4,6 +4,7 @@ import random
 
 def seed_products(category_name, product_list, min_products, max_products, descriptions=None, image_urls=None):
     with app.app_context():
+        categoriess = ["Shirts", "Trousers", "Suits", "Shoes", "Curtains", "Duvets", "Carpets", "Towels"]
         for _ in range(random.randint(min_products, max_products)):
             name = f"{category_name} - {random.choice(product_list)}"
             description = random.choice(descriptions) if descriptions else "One of the best products in our range."
@@ -15,7 +16,8 @@ def seed_products(category_name, product_list, min_products, max_products, descr
                 image_url=image_url,
                 price=random.randint(100, 1000),
                 onstock=random.choice([True, False]),
-                rating=random.randint(1, 5)
+                rating=random.randint(1, 5),
+                category=random.choice(categoriess)
             )
             db.session.add(product)
         db.session.commit()
@@ -159,7 +161,7 @@ if __name__ == "__main__":
 
         }
             
-            }
+        }
 
         for category, details in categories.items():
             seed_products(category, **details)

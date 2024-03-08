@@ -2,7 +2,7 @@ from flask import Flask, make_response, request, jsonify, render_template, sessi
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 from werkzeug.exceptions import NotFound
-from models import db, User, ShoppingCart, Receipt, Category, Wishlist
+from models import db, User, ShoppingCart, Receipt, Wishlist
 from auth import Auth
 import os
 # from flask_Bcrypt import Bcrypt

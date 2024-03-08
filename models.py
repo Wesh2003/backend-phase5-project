@@ -5,22 +5,34 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
+# Many-to-many relationship between Receipts and Products
+product_receipts = db.Table('product_receipts',
+                      db.Column('product_id', db.Integer, db.ForeignKey('products.id'), primary_key=True),
+                      db.Column('receipt_id', db.Integer, db.ForeignKey('receipts.id'), primary_key=True)
+                      )
+
+
 class Product(db.Model):
+    
     __tablename__ = 'products'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)  # Ensure a consistent length
     name = db.Column(db.String)
     description = db.Column(db.String(255), nullable=False)
+    category = db.Column(db.String(255), nullable=False)
     image_url = db.Column(db.String(255))  # Use db.String for consistency
     price = db.Column(db.Integer, nullable=False)
     onstock = db.Column(db.String(128), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
 
-    category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
+    # category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
+    # wishlist_id = db.Column(db.Integer, db.ForeignKey("wishlists.id"))
 
     shoppingcarts = relationship('ShoppingCart', backref='product')
     reviews = relationship('Review', backref='product')
+    receipts = db.relationship('Receipt', secondary=product_receipts, backref='product')
+    wishlists = relationship("Wishlist", back_populates="product")
 
     def __repr__(self):
         return f"Product(ID: {self.id}, Name: {self.name}, Price: {self.price}, Stock: {self.onstock}, Rating: {self.rating})"
@@ -53,6 +65,7 @@ class User(db.Model):
 
     shopping_cart = relationship('ShoppingCart', back_populates='user', uselist=False)  # Assume one shopping cart per user
     receipts = relationship('Receipt', back_populates='user')
+    wishlists = relationship("Wishlist", back_populates="user")
 
     def __repr__(self):
         return f"User(ID: {self.id}, Username: {self.username})"
@@ -80,8 +93,8 @@ class Wishlist(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
-    user = relationship('User', back_populates='shopping_cart')
-    wishlists = relationship('wishlist', back_populates='user', uselist=False)  
+    user = relationship('User', back_populates='wishlists')
+    product = relationship('Product', back_populates='wishlists')
 
     
 
@@ -109,17 +122,18 @@ class Receipt(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     user = db.relationship('User', back_populates='receipts')
 
+    
     def __repr__(self):
         return f"Receipt(ID: {self.id}, Details: {self.details}, Date: {self.created_at})"
 
-class Category(db.Model):
-    __tablename__ = "categories"
+# class Category(db.Model):
+#     __tablename__ = "categories"
 
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(128), nullable=False)  # Changed 'category' to 'name' for clarity
-    description = db.Column(db.String(255), nullable=False)
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(128), nullable=False)  # Changed 'category' to 'name' for clarity
+#     description = db.Column(db.String(255), nullable=False)
 
-    products = relationship('Product', backref='category')
+#     products = relationship('Product', backref='category')
 
-    def __repr__(self):
-        return f"Category(ID: {self.id}, Name: {self.name})"
+#     def __repr__(self):
+#         return f"Category(ID: {self.id}, Name: {self.name})"
