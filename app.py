@@ -1,8 +1,8 @@
-from flask import Flask, make_response, request, jsonify, render_template
+from flask import Flask, make_response, request, jsonify, render_template, session
 from flask_migrate import Migrate
 from flask_restful import Api, Resource
 from werkzeug.exceptions import NotFound
-from models import db, User, ShoppingCart, Receipt, Category, Wishlist
+from models import db, User, ShoppingCart, Receipt, Wishlist
 from auth import Auth
 import os
 # from flask_Bcrypt import Bcrypt
@@ -19,6 +19,9 @@ app = Flask(
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shoppingDatabase.db'
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+#app.config['JWT_SECRET_KEY'] = 'aec889f7f5b11e6ca2de8739ad202d5d4ce716cf377cc07d'
+#jwt = JWTManager(app)
 
 migrate = Migrate(app, db)
 
@@ -89,69 +92,76 @@ def get_products():
     return response 
 
 
-@app.route('/wishlists', methods=['POST'])
-@jwt_required()
+@app.route('/wishlists/add', methods=['POST'])
 def add_to_wishlists():
 
+    if 'user_id' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
 
-    current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-
-    product_id = request.json.get('product_id')
-    product = Product.query.get(product_id)
-    if not product:
-        return jsonify({'error': 'Product not found'}), 404    
-    
-    if Wishlist.query.filter_by(user_id=user.id, product_id=product.id).first():
-        return jsonify({'message': 'Product already in wishlists'}), 400
-
-    # Add product to user's wishlists
-    db.session.add(wishlist)
-    db.session.commit()
-
-    return jsonify({'message': 'Product added to wishlists successfully'}), 201
-
-
-@app.route('/wishlists/remove', methods=['DELETE'])
-@jwt_required()
-def remove_from_wishlists():
-    current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
+    user_id = session['user_id']
 
     product_id = request.json.get('product_id')
     product = Product.query.get(product_id)
     if not product:
         return jsonify({'error': 'Product not found'}), 404
 
-    wishlist = Wishlist.query.filter_by(user_id=user.id, product_id=product.id).first()
-    if not wishlist:
-        return jsonify({'message': 'Product not in wishlists'}), 400
+    existing_wishlist_item = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first()
+    if existing_wishlist_item:
+        return jsonify({'message': 'Product already in wishlist'}), 400
 
-    # Remove product from user's wishlists
-    db.session.delete(wishlist)
+    wishlist_item = Wishlist(user_id=user_id, product_id=product_id)
+    db.session.add(wishlist_item)
     db.session.commit()
 
-    return jsonify({'message': 'Product removed from wishlists successfully'}), 200
+    return jsonify({'message': 'Product added to wishlist successfully'}), 201
+
+
+@app.route('/wishlists/remove', methods=['DELETE'])
+def remove_from_wishlists():
+    if 'user_id' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    user_id = session['user_id']
+
+    
+    product_id = request.json.get('product_id')
+
+    wishlist_item = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first()
+    if not wishlist_item:
+        return jsonify({'error': 'Product not found in wishlist'}), 404
+
+    db.session.delete(wishlist_item)
+    db.session.commit()
+
+    return jsonify({'message': 'Product removed from wishlist successfully'}), 200
+    
 
 @app.route('/wishlists', methods=['GET'])
-@jwt_required()
 def get_wishlist_products():
-    current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
 
-    wishlists = Wishlist.query.filter_by(user_id=user.id).all()
-    wishlist_products = [{'id': wish.product_id, 'name': wish.product.name} for wish in wishlists]
+    if 'user_id' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
 
-    return jsonify({'wishlists': wishlist_products}), 200
+    user_id = session['user_id']
+
     
-    
+    user_wishlist = Wishlist.query.filter_by(user_id=user_id).all()
 
+
+    wishlist_data = []
+    for item in user_wishlist:
+        product = Product.query.get(item.product_id)
+        wishlist_data.append({
+            'product_id': product.id,
+            'name': product.name,
+            'description': product.description,
+            'price': product.price,
+            'image_url': product.image_url
+        })
+
+    return jsonify({'wishlist': wishlist_data}), 200
+
+    
 
 # @app.route("/" ,methods=["GET"])
 # 
