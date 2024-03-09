@@ -17,7 +17,7 @@ app = Flask(
     )
 # bcrypt= Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shoppingDatabase.db'
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 #app.config['JWT_SECRET_KEY'] = 'aec889f7f5b11e6ca2de8739ad202d5d4ce716cf377cc07d'
@@ -80,12 +80,16 @@ def get_products():
     for product in products:
         product_dict ={
             "id": product.id,
+            "name":product.name,
             "description": product.description,
             "price": product.price,
             "onstock": product.onstock,
             "rating": product.rating,
+            "image_url":product.image_url,
+            "category":product.category
             
         }
+        
         products_list.append(product_dict)
     response = make_response(jsonify(products_list),200)
     return response 
