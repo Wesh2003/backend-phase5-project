@@ -65,13 +65,8 @@ class User(db.Model):
 
     shopping_cart = relationship('ShoppingCart', back_populates='user', uselist=False)  # Assume one shopping cart per user
     receipts = relationship('Receipt', back_populates='user')
-<<<<<<< HEAD
-    # wishlists = relationship('wishlist', back_populates='user')  
-    
-=======
     wishlists = relationship("Wishlist", back_populates="user")
 
->>>>>>> c621740aecfd04d2d4f3d2dafc2deea3dfaa5790
     def __repr__(self):
         return f"User(ID: {self.id}, Username: {self.username})"
 
@@ -98,12 +93,8 @@ class Wishlist(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
-<<<<<<< HEAD
-    # user = relationship('User', back_populates='wishlists')
-=======
     user = relationship('User', back_populates='wishlists')
     product = relationship('Product', back_populates='wishlists')
->>>>>>> c621740aecfd04d2d4f3d2dafc2deea3dfaa5790
 
     
 

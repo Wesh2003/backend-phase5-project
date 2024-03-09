@@ -189,6 +189,24 @@ def get_reviews():
     ans = make_response(jsonify(review_list),200)
     return ans
 
+@app.route('/products', methods=["PATCH"])
+def patch_products():
+    data = request.json
+
+    onstock = data.get('onstock')
+    id = data.get('id')
+    product = Product.query.get(id)
+
+    if product:
+        product.onstock = onstock
+
+        db.session.commit()
+        return jsonify("stock updated"),200
+    else:
+        return jsonify("error updating stock"), 400
+
+
+
 @app.route("/reviews", methods=["POST"])
 def create_review():
     data = request.json
