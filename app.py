@@ -80,10 +80,13 @@ def get_products():
     for product in products:
         product_dict ={
             "id": product.id,
+            "name":product.name,
             "description": product.description,
             "price": product.price,
             "onstock": product.onstock,
             "rating": product.rating,
+            "image_url":product.image_url,
+            "category":product.category
             
         }
         products_list.append(product_dict)
