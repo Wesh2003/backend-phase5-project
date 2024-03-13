@@ -5,6 +5,7 @@ from werkzeug.exceptions import NotFound
 from models import db, User, ShoppingCart, Receipt, Wishlist
 from auth import Auth
 import os
+from flask_cors import CORS
 # from flask_Bcrypt import Bcrypt
 # from dotenv import load_dotenv
 # load_dotenv()
@@ -19,6 +20,9 @@ app = Flask(
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shoppingDatabase.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+CORS(app, resources={r"/api/*": {"origins": "*"}})
+
 
 #app.config['JWT_SECRET_KEY'] = 'aec889f7f5b11e6ca2de8739ad202d5d4ce716cf377cc07d'
 #jwt = JWTManager(app)

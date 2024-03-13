@@ -29,6 +29,7 @@ sqlalchemy-serializer = "*"
 werkzeug = "*"
 bcrypt = "*"
 flask-bcrypt = "*"
+flask-cors = "*"
 
 [dev-packages]
 
