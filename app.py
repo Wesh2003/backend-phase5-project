@@ -21,7 +21,7 @@ app = Flask(
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 #app.config['JWT_SECRET_KEY'] = 'aec889f7f5b11e6ca2de8739ad202d5d4ce716cf377cc07d'
@@ -39,7 +39,7 @@ api= Api(app)
 class Users(Resource):
     def get(self):
         users = User.query.all()
-        response = [{'id': user.id, 'name': user.name ,'email': user.email} for user in users]
+        response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
         return make_response(jsonify(response))
 
 @app.route('/users/<int:id>', methods=['GET'])
@@ -48,7 +48,7 @@ def user_by_id(id):
     try:
         if user:
             response = [{
-            "name": user.name, "id": user.id, "email": user.email
+            "name": user.name, "id": user.id, "email": user.email , "phone": user.phone
             }]
         return jsonify(response), 200
     except:
@@ -62,13 +62,14 @@ def register():
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
+    phone = data.get('phone')
 
     if not name or not email or not password:
         return jsonify({"error": "Incomplete or incorrect data provided"}), 400
 
     user = User.query.filter_by(name=name).first()  
     if not user:
-        user = User(name=name, email=email)
+        user = User(name=name, email=email, phone=phone)
         Auth.set_password(user, password)
         db.session.add(user)
         db.session.commit()
@@ -195,6 +196,24 @@ def get_reviews():
         review_list.append(review_dic)
     ans = make_response(jsonify(review_list),200)
     return ans
+
+@app.route('/products', methods=["PATCH"])
+def patch_products():
+    data = request.json
+
+    onstock = data.get('onstock')
+    id = data.get('id')
+    product = Product.query.get(id)
+
+    if product:
+        product.onstock = onstock
+
+        db.session.commit()
+        return jsonify("stock updated"),200
+    else:
+        return jsonify("error updating stock"), 400
+
+
 
 @app.route("/reviews", methods=["POST"])
 def create_review():
