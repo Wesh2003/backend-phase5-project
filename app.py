@@ -28,9 +28,9 @@ migrate = Migrate(app, db)
 db.init_app(app)
 api= Api(app)
 
-@app.route("/")
-def home():
-    return 'hello world'
+# @app.route("/")
+# def home():
+#     return 'hello world'
 
 class Users(Resource):
     def get(self):
