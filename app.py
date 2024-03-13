@@ -17,8 +17,8 @@ app = Flask(
     __name__,
     )
 # bcrypt= Bcrypt(app)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shoppingDatabase.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shoppingDatabase.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -38,9 +38,13 @@ api= Api(app)
 
 class Users(Resource):
     def get(self):
+        # users = User.query.all()
+        # response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
+        # return make_response(jsonify(response))
         users = User.query.all()
-        response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
-        return make_response(jsonify(response))
+        users_dict = [user.to_dict() for user in users]
+        response = make_response(jsonify(users_dict), 200)
+        return response 
 
 @app.route('/users/<int:id>', methods=['GET'])
 def user_by_id(id):
