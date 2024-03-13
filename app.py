@@ -62,13 +62,14 @@ def register():
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
+    phone = data.get('phone')
 
     if not name or not email or not password:
         return jsonify({"error": "Incomplete or incorrect data provided"}), 400
 
     user = User.query.filter_by(name=name).first()  
     if not user:
-        user = User(name=name, email=email)
+        user = User(name=name, email=email, password=password, phone=phone)
         Auth.set_password(user, password)
         db.session.add(user)
         db.session.commit()
