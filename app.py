@@ -92,8 +92,7 @@ def get_products():
         
         products_list.append(product_dict)
     response = make_response(jsonify(products_list),200)
-    return response 
-
+    return response
 
 @app.route('/wishlists/add', methods=['POST'])
 def add_to_wishlists():
