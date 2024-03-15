@@ -63,13 +63,13 @@ def register():
     data = request.get_json()
 
    
-    name = data.get('name')
+    name = data.get('username')
     email = data.get('email')
     password = data.get('password')
     phone = data.get('phone')
-    phone = data.get('phone')
+    
 
-    if not name or not email or not password:
+    if not name or not email or not password or not phone:
         return jsonify({"error": "Incomplete or incorrect data provided"}), 400
 
     user = User.query.filter_by(name=name).first()  
