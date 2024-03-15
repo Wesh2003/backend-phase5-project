@@ -6,6 +6,7 @@ from models import db, User, ShoppingCart, Receipt, Wishlist
 from auth import Auth
 import os
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 # from flask_Bcrypt import Bcrypt
 # from dotenv import load_dotenv
 # load_dotenv()
@@ -24,27 +25,39 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 
-#app.config['JWT_SECRET_KEY'] = 'aec889f7f5b11e6ca2de8739ad202d5d4ce716cf377cc07d'
-#jwt = JWTManager(app)
+
+app.config['JWT_SECRET_KEY'] = 'aec889f7f5b11e6ca2de8739ad202d5d4ce716cf377cc07d'
+jwt = JWTManager(app)
 
 migrate = Migrate(app, db)
 
 db.init_app(app)
 api= Api(app)
 
-# @app.route("/")
-# def home():
-#     return 'hello world'
+@app.route("/")
+def home():
+    return 'Shop Mate'
 
 class Users(Resource):
     def get(self):
-        # users = User.query.all()
-        # response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
-        # return make_response(jsonify(response))
         users = User.query.all()
-        users_dict = [user.to_dict() for user in users]
-        response = make_response(jsonify(users_dict), 200)
-        return response 
+        response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
+        return make_response(jsonify(response))
+    def post(self):    
+        email = request.json.get('email')
+        password = request.json.get('password')
+
+        if email and password:
+            # Query the database using the email
+            user = User.query.filter_by(email=email).first()
+
+            if user and password:
+                access_token = create_access_token(identity=user.email)
+                return {'access_token': access_token}, 200
+            else:
+                return {'message': "Invalid credentials"}, 401
+        else:
+            return {'message': "Invalid credentials"}, 401
 
 @app.route('/users/<int:id>', methods=['GET'])
 def user_by_id(id):
@@ -203,6 +216,7 @@ def get_reviews():
     return ans
 
 @app.route('/products', methods=["PATCH"])
+
 def patch_products():
     data = request.json
 
