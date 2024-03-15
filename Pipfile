@@ -9,6 +9,8 @@ flask-migrate = "*"
 flask-restful = "*"
 flask-cors = "*"
 bcrypt = "*"
+flask-jwt-extended = "*"
+gunicorn = "*"
 
 [dev-packages]
 
