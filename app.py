@@ -43,7 +43,7 @@ class Users(Resource):
         users = User.query.all()
         response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
         return make_response(jsonify(response))
-    def post(self):    
+    def post(self):
         email = request.json.get('email')
         password = request.json.get('password')
 
@@ -52,8 +52,9 @@ class Users(Resource):
             user = User.query.filter_by(email=email).first()
 
             if user and password:
+                # Assuming user.id is the user ID
                 access_token = create_access_token(identity=user.email)
-                return {'access_token': access_token}, 200
+                return {'user_id': user.id, 'access_token': access_token}, 200
             else:
                 return {'message': "Invalid credentials"}, 401
         else:
