@@ -43,21 +43,21 @@ class Users(Resource):
         users = User.query.all()
         response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
         return make_response(jsonify(response))
-    def post(self):    
-        email = request.json.get('email')
-        password = request.json.get('password')
+    # def post(self):    
+    #     email = request.json.get('email')
+    #     password = request.json.get('password')
 
-        if email and password:
-            # Query the database using the email
-            user = User.query.filter_by(email=email).first()
+    #     if email and password:
+    #         # Query the database using the email
+    #         user = User.query.filter_by(email=email).first()
 
-            if user and password:
-                access_token = create_access_token(identity=user.email)
-                return {'access_token': access_token}, 200
-            else:
-                return {'message': "Invalid credentials"}, 401
-        else:
-            return {'message': "Invalid credentials"}, 401
+    #         if user and password:
+    #             access_token = create_access_token(identity=user.email)
+    #             return {'access_token': access_token}, 200
+    #         else:
+    #             return {'message': "Invalid credentials"}, 401
+    #     else:
+    #         return {'message': "Invalid credentials"}, 401
 
 @app.route('/users/<int:id>', methods=['GET'])
 def user_by_id(id):
@@ -76,7 +76,7 @@ def register():
     data = request.get_json()
 
    
-    name = data.get('username')
+    name = data.get('name')
     email = data.get('email')
     password = data.get('password')
     phone = data.get('phone')
