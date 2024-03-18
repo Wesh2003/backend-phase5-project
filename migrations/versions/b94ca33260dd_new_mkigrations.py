@@ -1,8 +1,8 @@
-"""Initial migration.
+"""new mkigrations
 
-Revision ID: e6a0d85f0784
+Revision ID: b94ca33260dd
 Revises: 
-Create Date: 2024-03-08 11:25:04.591589
+Create Date: 2024-03-18 09:46:42.701223
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'e6a0d85f0784'
+revision = 'b94ca33260dd'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -37,9 +37,9 @@ def upgrade():
     )
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('username', sa.String(length=128), nullable=False),
+    sa.Column('name', sa.String(length=128), nullable=False),
     sa.Column('email', sa.String(length=128), nullable=False),
-    sa.Column('phone', sa.String(length=20), nullable=False),
+    sa.Column('phone', sa.Integer(), nullable=False),
     sa.Column('password', sa.String(length=128), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
