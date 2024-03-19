@@ -71,6 +71,24 @@ def user_by_id(id):
     except:
             response = {"error": "No such user"}
             return jsonify(response), 404
+    
+@app.route("/products/<int:id>", methods=["PATCH"])
+def update_product_category(id):
+    product = Product.query.get(id)
+    
+    if not product:
+        return jsonify({"message": "Product not found"}), 404
+    
+    data = request.json
+    new_category = data.get("category")
+
+    if not new_category:
+        return jsonify({"message": "Category not provided"}), 400
+
+    product.category = new_category
+    db.session.commit()
+
+    return jsonify({"message": "Product category updated successfully"}), 200
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -162,14 +180,14 @@ def remove_from_wishlists():
     return jsonify({'message': 'Product removed from wishlist successfully'}), 200
     
 
-@app.route('/wishlists', methods=['GET'])
+@app.route('/wishlists/<int:id>', methods=['GET'])
 def get_wishlist_products():
 
-    if 'user_id' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
+    # if 'user_id' not in session:
+    #     return jsonify({'error': 'User not logged in'}), 401
 
-    user_id = session['user_id']
-
+    # user_id = session['user_id']
+    user_id = 1
     
     user_wishlist = Wishlist.query.filter_by(user_id=user_id).all()
 
