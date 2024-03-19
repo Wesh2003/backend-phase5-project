@@ -18,8 +18,8 @@ app = Flask(
     __name__,
     )
 # bcrypt= Bcrypt(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shoppingDatabase.db'
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shoppingDatabase.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -218,20 +218,10 @@ def get_wishlist_products():
 
 @app.route('/reviews', methods=['GET'])
 def get_reviews():
-    reviews = Review.query.all()
-    review_list = []
-    for review in reviews:
-        review_dic={
-            'id': review.id,
-            'description': review.description,
-            'rating': review.rating,
-            'created_at': review.created_at,
-            'product_id': review.product_id,
-            'user_id': review.user_id
-        }
-        review_list.append(review_dic)
-    ans = make_response(jsonify(review_list),200)
-    return ans
+    all_reviews = Review.query.all()
+    review_dict= [review.to_dict() for review in all_reviews]
+    response= make_response(jsonify(review_dict), 200)
+    return response
 
 @app.route('/products', methods=["PATCH"])
 
@@ -260,31 +250,42 @@ def create_review():
     product_id = data.get("product_id")
     user_id = data.get("user_id")
     
-    if not all([description, rating, product_id, user_id]):
-        return jsonify({"error": "Missing fields!"}), 400
+    try:
+        new_review= Review(description = description, rating= rating, product_id = product_id, user_id= user_id)
+        db.session.add(new_review)
+        db.session.commit()
+
+        new_review_dict= new_review.to_dict()
+        response = make_response(jsonify(new_review_dict), 200)
+        return response
+    except Exception as e:
+        response= make_response({'error': str(e)}, 400)
+        return response
+    # if not all([description, rating, product_id, user_id]):
+    #     return jsonify({"error": "Missing fields!"}), 400
 
     # Create a new review object
-    new_review = Review(
-        description=description,
-        rating=rating,
-        product_id=product_id,
-        user_id=user_id
-    )
+    # new_review = Review(
+    #     description=description,
+    #     rating=rating,
+    #     product_id=product_id,
+    #     user_id=user_id
+    # )
 
-    db.session.add(new_review)
-    db.session.commit()
+    # db.session.add(new_review)
+    # db.session.commit()
 
-    review_details = {
-        "id": new_review.id,
-        "description": new_review.description,
-        "rating": new_review.rating,
-        "created_at": new_review.created_at.isoformat(),
-        "product_id": new_review.product_id,
-        "user_id": new_review.user_id
-    }
+    # review_details = {
+    #     "id": new_review.id,
+    #     "description": new_review.description,
+    #     "rating": new_review.rating,
+    #     "created_at": new_review.created_at.isoformat(),
+    #     "product_id": new_review.product_id,
+    #     "user_id": new_review.user_id
+    # }
 
-    ans = make_response(jsonify(review_details),200)
-    return ans
+    # ans = make_response(jsonify(review_details),200)
+    # return ans
         
        
          
@@ -363,6 +364,12 @@ def delete_shopping_cart_item(id):
     db.session.commit()
     response =  make_response("Item deleted", 200)
     return response  
+
+# @app.route("/receipts", methods=["POST"])
+# def add_receipt():
+#     data = request.get_json()
+
+
 
 
 

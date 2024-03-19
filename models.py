@@ -18,7 +18,6 @@ class Product(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)  # Ensure a consistent length
-    name = db.Column(db.String)
     description = db.Column(db.String(255), nullable=False)
     category = db.Column(db.String(255), nullable=False)
     image_url = db.Column(db.String(255))  # Use db.String for consistency
