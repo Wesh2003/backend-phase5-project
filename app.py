@@ -62,7 +62,8 @@ class Users(Resource):
 
 @app.route('/userprofile', methods=['GET'])
 def user_by_name():
-    name = request.args.get('name')
+    data = request.json
+    name = data.get('name')
     user = User.query.filter_by(name=name).first()
     try:
         if user:
