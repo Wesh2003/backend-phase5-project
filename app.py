@@ -60,19 +60,17 @@ class Users(Resource):
         else:
             return {'message': "Invalid credentials"}, 401
 
-@app.route('/userprofile', methods=['GET'])
-def user_by_name():
-    data = request.json
-    name = data.get('name')
+@app.route('/users/<string:name>', methods=['GET'])
+def user_by_name(name):
     user = User.query.filter_by(name=name).first()
     try:
         if user:
-            response = [{
+            response = {
                 "name": user.name,
                 "id": user.id,
                 "email": user.email,
                 "phone": user.phone
-            }]
+            }
             return jsonify(response), 200
         else:
             response = {"error": "No such user"}
@@ -80,6 +78,7 @@ def user_by_name():
     except Exception as e:
         response = {"error": str(e)}
         return jsonify(response), 500
+
     
 @app.route("/products/<int:id>", methods=["PATCH"])
 def update_product_category(id):
