@@ -143,8 +143,7 @@ def get_products():
         
         products_list.append(product_dict)
     response = make_response(jsonify(products_list),200)
-    return response 
-
+    return response
 
 @app.route('/wishlists/add', methods=['POST'])
 def add_to_wishlists():
@@ -197,6 +196,8 @@ def get_wishlist_products():
         return jsonify({'error': 'User not logged in'}), 401
 
     user_id = session['user_id']
+    
+    
     
     
     user_wishlist = Wishlist.query.filter_by(user_id=user_id).all()
