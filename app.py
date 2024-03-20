@@ -46,13 +46,13 @@ class Users(Resource):
         users = User.query.all()
         response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
         return make_response(jsonify(response))
-    # def post(self):    
-    #     email = request.json.get('email')
-    #     password = request.json.get('password')
+    def post(self):    
+        email = request.json.get('email')
+        password = request.json.get('password')
 
-    #     if email and password:
-    #         # Query the database using the email
-    #         user = User.query.filter_by(email=email).first()
+        if email and password:
+            # Query the database using the email
+            user = User.query.filter_by(email=email).first()
 
             if user and password:
                 # Assuming user.id is the user ID
@@ -62,17 +62,17 @@ class Users(Resource):
                 return {'message': "Invalid credentials"}, 401
         else:
             return {'message': "Invalid credentials"}, 401
-app.route('/login', methods=['GET'])
-def post(self):
-        data = request.get_json()
-        name = data.get('username')
-        password = data.get('password')       
-        user = User.query.filter_by(name).first()
-        if user and password:
-                access_token = create_access_token(identity=user.name)
-                return {'access_token': access_token , 'id': user.id}, 200
-        else:
-                return {"message": "invalid credentials"}, 401
+# app.route('/login', methods=['GET'])
+# def post(self):
+#         data = request.get_json()
+#         name = data.get('username')
+#         password = data.get('password')       
+#         user = User.query.filter_by(name).first()
+#         if user and password:
+#                 access_token = create_access_token(identity=user.name)
+#                 return {'access_token': access_token , 'id': user.id}, 200
+#         else:
+#                 return {"message": "invalid credentials"}, 401
 
 @app.route('/users/<string:name>', methods=['GET'])
 def user_by_name(name):
