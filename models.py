@@ -61,7 +61,8 @@ class Review(db.Model):
             "rating":self.rating,
             "description":self.description,
             "product_id": self.product_id,
-            "user_id": self.user_id
+            "user_id": self.user_id,
+            "created_at":self.created_at
             }
 
 class User(db.Model):
@@ -143,7 +144,9 @@ class Receipt(db.Model):
             "delivery_address":self.delivery_address,
             "city":self.city,
             "user_id": self.user_id,
-            "created_at":self.created_at
+            "created_at":self.created_at,
+            "name":self.user_id.name
+
             }
 
 # class Category(db.Model):
