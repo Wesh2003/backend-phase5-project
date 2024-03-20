@@ -31,7 +31,7 @@ class Product(db.Model):
     # wishlist_id = db.Column(db.Integer, db.ForeignKey("wishlists.id"))
 
     shoppingcarts = relationship('ShoppingCart', backref='product')
-    reviews = relationship('Review', backref='product')
+    # reviews = relationship('Review', backref='product')
     receipts = db.relationship('Receipt', secondary=product_receipts, backref='product')
     wishlists = relationship("Wishlist", back_populates="product")
 
