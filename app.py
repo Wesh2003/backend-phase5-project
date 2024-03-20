@@ -81,7 +81,9 @@ def user_by_name(name):
     except Exception as e:
         response = {"error": str(e)}
         return jsonify(response), 500
+
 @app.route('/users/<int:id>', methods=['GET'])
+
 def user_by_id(id):
     try:
         # Attempt to retrieve the user by ID from the database
