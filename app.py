@@ -441,7 +441,7 @@ def delete_shopping_cart_item(id):
   
 @app.route("/receipt/last", methods=["GET" ])
 def get_last_receipt():
-    last_receipt = Receipt.query.order_by(desc(Receipt.created_at)).first()
+    last_receipt = Receipt.query.order_by(desc(Receipt.id)).first()
 
     if last_receipt:
         return jsonify(last_receipt.to_dict()), 200
