@@ -20,7 +20,6 @@ class Product(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), nullable=False)  # Ensure a consistent length
-    name = db.Column(db.String)
     description = db.Column(db.String(255), nullable=False)
     category = db.Column(db.String(255), nullable=False)
     image_url = db.Column(db.String(255))  # Use db.String for consistency
@@ -55,6 +54,16 @@ class Review(db.Model):
 
     def __repr__(self):
         return f"Review(ID: {self.id}, Rating: {self.rating}, Posted: {self.created_at})"
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "rating":self.rating,
+            "description":self.description,
+            "product_id": self.product_id,
+            "user_id": self.user_id,
+            "created_at":self.created_at
+            }
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -128,6 +137,15 @@ class Receipt(db.Model):
     
     def __repr__(self):
         return f"Receipt(ID: {self.id}, Details: {self.details}, Date: {self.created_at})"
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "delivery_address":self.delivery_address,
+            "city":self.city,
+            "user_id": self.user_id,
+            "created_at":self.created_at
+            }
 
 # class Category(db.Model):
 #     __tablename__ = "categories"

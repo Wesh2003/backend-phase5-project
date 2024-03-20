@@ -46,13 +46,13 @@ class Users(Resource):
         users = User.query.all()
         response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
         return make_response(jsonify(response))
-    def post(self):
-        email = request.json.get('email')
-        password = request.json.get('password')
+    # def post(self):    
+    #     email = request.json.get('email')
+    #     password = request.json.get('password')
 
-        if email and password:
-            # Query the database using the email
-            user = User.query.filter_by(email=email).first()
+    #     if email and password:
+    #         # Query the database using the email
+    #         user = User.query.filter_by(email=email).first()
 
             if user and password:
                 # Assuming user.id is the user ID
@@ -145,7 +145,7 @@ def register():
     data = request.get_json()
 
    
-    name = data.get('username')
+    name = data.get('name')
     email = data.get('email')
     password = data.get('password')
     phone = data.get('phone')
@@ -185,14 +185,16 @@ def get_products():
         products_list.append(product_dict)
     response = make_response(jsonify(products_list),200)
     return response
-
+# Modify add_to_wishlists endpoint
 @app.route('/wishlists/add', methods=['POST'])
 def add_to_wishlists():
+    # Retrieve user_id from the request JSON
+    user_id = request.json.get('user_id')
 
-    if 'user_id' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
-
-    user_id = session['user_id']
+    # Check if the user exists
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
 
     product_id = request.json.get('product_id')
     product = Product.query.get(product_id)
@@ -208,7 +210,6 @@ def add_to_wishlists():
     db.session.commit()
 
     return jsonify({'message': 'Product added to wishlist successfully'}), 201
-
 
 @app.route('/wishlists/remove', methods=['DELETE'])
 def remove_from_wishlists():
@@ -230,19 +231,17 @@ def remove_from_wishlists():
     return jsonify({'message': 'Product removed from wishlist successfully'}), 200
     
 
-@app.route('/wishlists/<int:id>', methods=['GET'])
-def get_wishlist_products():
+@app.route('/wishlists/<int:user_id>', methods=['GET'])
+def get_wishlist_products(user_id):
+    # Retrieve the user from the database based on the user ID
+    user = User.query.get(user_id)
 
-    if 'user_id' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
+    # Check if the user exists
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
 
-    user_id = session['user_id']
-    
-    
-    
-    
+    # Retrieve the wishlist items for the specified user
     user_wishlist = Wishlist.query.filter_by(user_id=user_id).all()
-
 
     wishlist_data = []
     for item in user_wishlist:
@@ -257,6 +256,7 @@ def get_wishlist_products():
 
     return jsonify({'wishlist': wishlist_data}), 200
 
+
     
 
 # @app.route("/" ,methods=["GET"])
@@ -270,20 +270,10 @@ def get_wishlist_products():
 
 @app.route('/reviews', methods=['GET'])
 def get_reviews():
-    reviews = Review.query.all()
-    review_list = []
-    for review in reviews:
-        review_dic={
-            'id': review.id,
-            'description': review.description,
-            'rating': review.rating,
-            'created_at': review.created_at,
-            'product_id': review.product_id,
-            'user_id': review.user_id
-        }
-        review_list.append(review_dic)
-    ans = make_response(jsonify(review_list),200)
-    return ans
+    all_reviews = Review.query.all()
+    review_dict= [review.to_dict() for review in all_reviews]
+    response= make_response(jsonify(review_dict), 200)
+    return response
 
 @app.route('/products', methods=["PATCH"])
 
@@ -312,31 +302,42 @@ def create_review():
     product_id = data.get("product_id")
     user_id = data.get("user_id")
     
-    if not all([description, rating, product_id, user_id]):
-        return jsonify({"error": "Missing fields!"}), 400
+    try:
+        new_review= Review(description = description, rating= rating, product_id = product_id, user_id= user_id)
+        db.session.add(new_review)
+        db.session.commit()
+
+        new_review_dict= new_review.to_dict()
+        response = make_response(jsonify(new_review_dict), 200)
+        return response
+    except Exception as e:
+        response= make_response({'error': str(e)}, 400)
+        return response
+    # if not all([description, rating, product_id, user_id]):
+    #     return jsonify({"error": "Missing fields!"}), 400
 
     # Create a new review object
-    new_review = Review(
-        description=description,
-        rating=rating,
-        product_id=product_id,
-        user_id=user_id
-    )
+    # new_review = Review(
+    #     description=description,
+    #     rating=rating,
+    #     product_id=product_id,
+    #     user_id=user_id
+    # )
 
-    db.session.add(new_review)
-    db.session.commit()
+    # db.session.add(new_review)
+    # db.session.commit()
 
-    review_details = {
-        "id": new_review.id,
-        "description": new_review.description,
-        "rating": new_review.rating,
-        "created_at": new_review.created_at.isoformat(),
-        "product_id": new_review.product_id,
-        "user_id": new_review.user_id
-    }
+    # review_details = {
+    #     "id": new_review.id,
+    #     "description": new_review.description,
+    #     "rating": new_review.rating,
+    #     "created_at": new_review.created_at.isoformat(),
+    #     "product_id": new_review.product_id,
+    #     "user_id": new_review.user_id
+    # }
 
-    ans = make_response(jsonify(review_details),200)
-    return ans
+    # ans = make_response(jsonify(review_details),200)
+    # return ans
         
        
          
@@ -450,39 +451,56 @@ def delete_shopping_cart_item(id):
     response =  make_response("Item deleted", 200)
     return response
   
-@app.route("/receipt", methods = ["GET" ])
+@app.route("/receipt/last", methods=["GET"])
+def get_last_receipt():
+    last_receipt = Receipt.query.order_by(desc(Receipt.id)).first()
 
+    if last_receipt:
+        return jsonify(last_receipt.to_dict()), 200
+    else:
+        return jsonify({"message": "No receipts found"}), 404
 
+@app.route("/receipt", methods=["GET"])
+def get_all_receipts():
+    all_receipts = Receipt.query.all()
+    receipt_dict= [receipt.to_dict() for receipt in all_receipts]
+    response= make_response(jsonify(receipt_dict), 200)
+    return response
 
 @app.route('/receipt', methods=['POST'])
 def add_receipt():
     data = request.json
     
     # Extract receipt details from the request JSON
-    details = data.get('details')
+    delivery_address = data.get('delivery_address')
+    city = data.get('city')
     user_id = data.get('user_id')
 
-    if not details or not user_id:
-        return jsonify({'error': 'Both details and user_id are required.'}), 400
-    
-    created_at = datetime.now()
-
     try:
-        # Create a new Receipt object
-        new_receipt = Receipt(details=details, created_at=created_at, user_id=user_id)
-        
-        # Add the new receipt to the database
+        new_receipt= Receipt(delivery_address=delivery_address, city=city, user_id=user_id)
         db.session.add(new_receipt)
         db.session.commit()
 
-        # Return a success response
-        return jsonify({'message': 'Receipt added successfully'}), 201
+        new_receipt_dict= new_receipt.to_dict()
+        response = make_response(jsonify(new_receipt_dict), 200)
+        return response
+    except Exception as e:
+        response= make_response({'error': str(e)}, 400)
+        return response
     
     except Exception as e:
         # Return an error response if something goes wrong
         return jsonify({'error': str(e)}), 400
 
-
+@app.route('/receipt/<int:receipt_id>', methods=['DELETE'])
+def delete_receipt(receipt_id):
+    receipt = Receipt.query.get(receipt_id)
+    if receipt:
+        db.session.delete(receipt)
+        db.session.commit()
+        return jsonify(message='Receipt deleted successfully'), 200
+    else:
+        return jsonify(message='Receipt not found'), 404
 
 
     
