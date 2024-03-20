@@ -38,6 +38,19 @@ class Product(db.Model):
     def __repr__(self):
         return f"Product(ID: {self.id}, Name: {self.name}, Price: {self.price}, Stock: {self.onstock}, Rating: {self.rating})"
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name':self.name,
+            'description': self.description,
+            'category':self.category,
+            'image_url':self.image_url,
+            'price':self.price,
+            'onstock':self.onstock,
+            'rating':self.rating
+            # Add more attributes if needed
+        }
+
 class Review(db.Model):
     __tablename__ = 'reviews'
 
@@ -81,6 +94,16 @@ class User(db.Model):
     def __repr__(self):
         return f"User(ID: {self.id}, Username: {self.username})"
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.product_id,
+            'email': self.user_id,
+            'password':self.password,
+            'phone':self.phone
+            # Add more attributes if needed
+        }
+
 class ShoppingCart(db.Model):
     __tablename__ = 'shopping_carts'  # Use snake_case for table names
 
@@ -107,7 +130,13 @@ class Wishlist(db.Model):
     user = relationship('User', back_populates='wishlists')
     product = relationship('Product', back_populates='wishlists')
 
-    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'product_id': self.product_id,
+            'user_id': self.user_id
+            # Add more attributes if needed
+        }
 
 class Admin(db.Model):
     __tablename__ = 'admins'
@@ -115,11 +144,12 @@ class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String)
     password = db.Column(db.String)
+
     def to_dict(self):
         return {
             'id': self.id,
-            'product_id': self.product_id,
-            'user_id': self.user_id
+            'username': self.username,
+            'password': self.password
             # Add more attributes if needed
         }
 
