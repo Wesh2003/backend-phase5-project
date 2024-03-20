@@ -448,17 +448,18 @@ def add_receipt():
     data = request.json
     
     # Extract receipt details from the request JSON
-    details = data.get('details')
+    delivery_address = data.get('delivery_address')
+    city = data.get('city')
     user_id = data.get('user_id')
 
-    if not details or not user_id:
+    if not delivery_address or not user_id:
         return jsonify({'error': 'Both details and user_id are required.'}), 400
     
     created_at = datetime.now()
 
     try:
         # Create a new Receipt object
-        new_receipt = Receipt(details=details, created_at=created_at, user_id=user_id)
+        new_receipt = Receipt(delivery_address=delivery_address, created_at=created_at, user_id=user_id, city=city)
         
         # Add the new receipt to the database
         db.session.add(new_receipt)
