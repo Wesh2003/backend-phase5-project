@@ -439,9 +439,14 @@ def delete_shopping_cart_item(id):
     response =  make_response("Item deleted", 200)
     return response
   
-@app.route("/receipt", methods = ["GET" ])
-
-
+@app.route("/receipt/last", methods = ["GET" ])
+def get_last_receipt():
+    last_receipt = Receipt.query.order_by(desc(Receipt.created_at)).first()
+    
+    if last_receipt:
+        return jsonify(last_receipt.to_dict()), 200
+    else:
+        return jsonify({"message": "No receipts found"}), 404
 
 @app.route('/receipt', methods=['POST'])
 def add_receipt():
@@ -472,7 +477,15 @@ def add_receipt():
         # Return an error response if something goes wrong
         return jsonify({'error': str(e)}), 400
 
-
+@app.route('/receipt/<int:receipt_id>', methods=['DELETE'])
+def delete_review(receipt_id):
+    receipt = Receipt.query.get(receipt_id)
+    if receipt:
+        db.session.delete(receipt)
+        db.session.commit()
+        return jsonify(message='Receipt deleted successfully'), 200
+    else:
+        return jsonify(message='Receipt not found'), 404
 
 
     
