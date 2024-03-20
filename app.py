@@ -407,55 +407,67 @@ def update_review(review_id):
     ans = make_response(jsonify(review_details))
     return ans
 
-@app.route("/shoppingcart", methods=["POST"])
-def add_to_cart():
-    try:
-        data = request.get_json()
+class Cart(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
 
-        # Validate input data
-        if 'product_id' not in data or 'user_id' not in data:
-            raise ValueError("Both 'product_id' and 'user_id' are required.")
+            # Validate input data
+            if 'product_id' not in data or 'user_id' not in data:
+                raise ValueError("Both 'product_id' and 'user_id' are required.")
+            
+            product_id = data['product_id']
+            user_id = data['user_id']
+
+            # Create new Cart object
+            new_cart_item = Cart(product_id=product_id, user_id=user_id)
+            
+            # Add new item to the database
+            new_shopping_cart_item = ShoppingCart(product_id=new_cart_item.product_id, user_id=new_cart_item.user_id)
+            db.session.add(new_shopping_cart_item)
+            db.session.commit()
+
+            # Prepare response
+            new_cart_item_dict = {
+                "product_id": new_cart_item.product_id,
+                "user_id": new_cart_item.user_id
+            }
+            response = jsonify(new_cart_item_dict)
+            response.status_code = 200
+            return response 
         
-        product_id = data['product_id']
-        user_id = data['user_id']
-
-        # Create new ShoppingCart object
-        new_cart_item = ShoppingCart(product_id=product_id, user_id=user_id)
+        except KeyError as e:
+            error_message = f"Missing key: {e}"
+            return make_response({'error': error_message}, 400)
         
-        # Add new item to the database
-        db.session.add(new_cart_item)
-        db.session.commit()
+        except ValueError as e:
+            return make_response({'error': str(e)}, 400)
+        
+        except Exception as e:
+            return make_response({'error': str(e)}, 500)
 
-        # Prepare response
-        new_cart_item_dict = new_cart_item.to_dict()
-        response = jsonify(new_cart_item_dict)
-        response.status_code = 200
-        return response 
-    
-    except KeyError as e:
-        error_message = f"Missing key: {e}"
-        return make_response({'error': error_message}, 400)
-    
-    except ValueError as e:
-        return make_response({'error': str(e)}, 400)
-    
-    except Exception as e:
-        return make_response({'error': str(e)}, 500)
+    def get(self):
+        try:
+            all_shopping_cart_items = ShoppingCart.query.all()
+            shopping_cart_items_dict = [item.to_dict() for item in all_shopping_cart_items]
+            response = make_response(jsonify(shopping_cart_items_dict), 200)
+            return response 
+        
+        except Exception as e:
+            return make_response({'error': str(e)}, 500)
 
-@app.route("/shoppingcart" ,methods=["GET"])
-def display_products_in_cart():
-    all_shopping_cart_items = ShoppingCart.query.all()
-    shopping_cart_items_dict = [item.to_dict() for item in all_shopping_cart_items]
-    response = make_response(jsonify(all_shopping_cart_items), 200)
-    return response 
-
-@app.route("/shoppingcart/<int:id>" ,methods=["DELETE"])
-def delete_shopping_cart_item(id):
-    item = ShoppingCart.query.filter_by(id=id).first()
-    db.session.delete(item)
-    db.session.commit()
-    response =  make_response("Item deleted", 200)
-    return response
+    def delete(self, id):
+        try:
+            item = ShoppingCart.query.filter_by(id=id).first()
+            if item:
+                db.session.delete(item)
+                db.session.commit()
+                return make_response("Item deleted", 200)
+            else:
+                return make_response("Item not found", 404)
+        
+        except Exception as e:
+            return make_response({'error': str(e)}, 500)
   
 @app.route("/receipt/last", methods=["GET"])
 def get_last_receipt():
@@ -512,6 +524,7 @@ def delete_receipt(receipt_id):
     
 
 api.add_resource(Users, "/users")
+api.add_resource(Cart, "/shoppingcart")
 
 if __name__ == '__main__':
     app.run(port = 5555, debug = True)
