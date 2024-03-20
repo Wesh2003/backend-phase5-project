@@ -106,14 +106,13 @@ class User(db.Model):
         }
 
 class ShoppingCart(db.Model):
-    __tablename__ = 'shopping_carts'  # Use snake_case for table names
-
+    __tablename__ = 'shopping_cart'
+    
     id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey("products.id"))
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # Added nullable=False
 
     user = relationship('User', back_populates='shopping_cart')
-
     def to_dict(self):
         return {
             'id': self.id,
