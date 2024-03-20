@@ -54,6 +54,15 @@ class Review(db.Model):
 
     def __repr__(self):
         return f"Review(ID: {self.id}, Rating: {self.rating}, Posted: {self.created_at})"
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "rating":self.rating,
+            "description":self.description,
+            "product_id": self.product_id,
+            "user_id": self.user_id
+            }
 
 class User(db.Model):
     __tablename__ = 'users'

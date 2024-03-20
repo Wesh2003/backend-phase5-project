@@ -439,7 +439,7 @@ def delete_shopping_cart_item(id):
     response =  make_response("Item deleted", 200)
     return response
   
-@app.route("/receipt/last", methods=["GET" ])
+@app.route("/receipt/last", methods=["GET"])
 def get_last_receipt():
     last_receipt = Receipt.query.order_by(desc(Receipt.id)).first()
 
@@ -448,7 +448,7 @@ def get_last_receipt():
     else:
         return jsonify({"message": "No receipts found"}), 404
 
-@app.route("/receipt", methods=["GET" ])
+@app.route("/receipt", methods=["GET"])
 def get_all_receipts():
     all_receipts = Receipt.query.all()
     receipt_dict= [receipt.to_dict() for receipt in all_receipts]
