@@ -81,6 +81,24 @@ def user_by_name(name):
     except Exception as e:
         response = {"error": str(e)}
         return jsonify(response), 500
+@app.route('/user/<int:id>', methods=['GET'])
+def user_by_id(id):
+    user = User.query.filter_by(id=id).first()
+    try:
+        if user:
+            response = {
+                "name": user.name,
+                "id": user.id,
+                "email": user.email,
+                "phone": user.phone
+            }
+            return jsonify(response), 200
+        else:
+            response = {"error": "No such user"}
+            return jsonify(response), 404
+    except Exception as e:
+        response = {"error": str(e)}
+        return jsonify(response), 500
 
     
 @app.route("/products/<int:id>", methods=["PATCH"])
