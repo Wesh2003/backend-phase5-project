@@ -142,7 +142,8 @@ class Receipt(db.Model):
             "id": self.id,
             "delivery_address":self.delivery_address,
             "city":self.city,
-            "user_id": self.user_id
+            "user_id": self.user_id,
+            "created_at":self.created_at
             }
 
 # class Category(db.Model):
