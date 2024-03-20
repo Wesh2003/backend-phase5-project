@@ -136,6 +136,14 @@ class Receipt(db.Model):
     
     def __repr__(self):
         return f"Receipt(ID: {self.id}, Details: {self.details}, Date: {self.created_at})"
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "delivery_address":self.delivery_address,
+            "city":self.city,
+            "user_id": self.user_id
+            }
 
 # class Category(db.Model):
 #     __tablename__ = "categories"
