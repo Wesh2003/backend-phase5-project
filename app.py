@@ -464,21 +464,17 @@ def add_receipt():
     city = data.get('city')
     user_id = data.get('user_id')
 
-    if not delivery_address or not user_id:
-        return jsonify({'error': 'Both details and user_id are required.'}), 400
-    
-    created_at = datetime.now()
-
     try:
-        # Create a new Receipt object
-        new_receipt = Receipt(delivery_address=delivery_address, created_at=created_at, user_id=user_id, city=city)
-        
-        # Add the new receipt to the database
+        new_receipt= Receipt(delivery_address = delivery_address, city= city, user_id = user_id)
         db.session.add(new_receipt)
         db.session.commit()
 
-        # Return a success response
-        return jsonify({'message': 'Receipt added successfully'}), 201
+        new_receipt_dict= new_receipt.to_dict()
+        response = make_response(jsonify(new_receipt_dict), 200)
+        return response
+    except Exception as e:
+        response= make_response({'error': str(e)}, 400)
+        return response
     
     except Exception as e:
         # Return an error response if something goes wrong
