@@ -147,6 +147,8 @@ def get_wishlist_products():
     user_id = session['user_id']
 
     
+    
+    
     user_wishlist = Wishlist.query.filter_by(user_id=user_id).all()
 
 
