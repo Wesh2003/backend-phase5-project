@@ -94,11 +94,12 @@ def user_by_name(name):
         return jsonify(response), 500
 
 @app.route('/users/<int:id>', methods=['GET'])
-
+@jwt_required()
 def user_by_id(id):
     try:
+        current_user_id = get_jwt_identity()
         # Attempt to retrieve the user by ID from the database
-        user = User.query.get(id)
+        user = User.query.get(id=current_user_id).first()
         
         # Check if the user exists
         if user:
