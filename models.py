@@ -90,7 +90,7 @@ class User(db.Model):
     phone = db.Column(db.Integer, nullable=False)  # Use string for phone numbers
     password = db.Column(db.String(128), nullable=False)  # Assume hashed password
 
-    shopping_cart = relationship('ShoppingCart', back_populates='user', uselist=False)  # Assume one shopping cart per user
+    shopping_cart = db.relationship('ShoppingCart', back_populates='user', uselist=False)  # Assume one shopping cart per user
     receipts = relationship('Receipt', back_populates='user')
     wishlists = relationship("Wishlist", back_populates="user")
 
@@ -114,7 +114,7 @@ class ShoppingCart(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey("products.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)  # Added nullable=False
 
-    user = relationship('User', back_populates='shopping_cart')
+    user = db.relationship('User', back_populates='shopping_cart')
     def to_dict(self):
         return {
             'id': self.id,
