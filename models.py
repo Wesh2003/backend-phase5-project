@@ -85,8 +85,8 @@ class ShoppingCart(db.Model):
     __tablename__ = 'shopping_carts'  # Use snake_case for table names
 
     id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey("products.id") NOT NULL)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id") NOT )
+    product_id = db.Column(db.Integer, db.ForeignKey("products.id") )
+    user_id = db.Column(db.Integer NOT NULL, db.ForeignKey("users.id"))
 
     user = relationship('User', back_populates='shopping_cart')
 
