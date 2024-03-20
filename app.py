@@ -465,7 +465,7 @@ def add_receipt():
     user_id = data.get('user_id')
 
     try:
-        new_receipt= Receipt(delivery_address = delivery_address, city= city, user_id = user_id)
+        new_receipt= Receipt(delivery_address=delivery_address, city=city, user_id=user_id)
         db.session.add(new_receipt)
         db.session.commit()
 
