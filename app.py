@@ -478,7 +478,7 @@ def add_receipt():
         return jsonify({'error': str(e)}), 400
 
 @app.route('/receipt/<int:receipt_id>', methods=['DELETE'])
-def delete_review(receipt_id):
+def delete_receipt(receipt_id):
     receipt = Receipt.query.get(receipt_id)
     if receipt:
         db.session.delete(receipt)
