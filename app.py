@@ -42,10 +42,15 @@ def home():
     return 'Shop Mate'
 
 class Users(Resource):
+    @jwt_required()
     def get(self):
-        users = User.query.all()
-        response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
-        return make_response(jsonify(response))
+        current_user_id = get_jwt_identity
+        user = User.query.filter_by(id=current_user_id).first()
+        if user:
+            # response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
+            return make_response(jsonify(user.serialize), 200)
+        else:
+            return {"error":"user not found"}, 
     def post(self):    
         email = request.json.get('email')
         password = request.json.get('password')
