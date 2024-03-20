@@ -446,7 +446,7 @@ def add_to_cart():
 def display_products_in_cart():
     all_shopping_cart_items = ShoppingCart.query.all()
     shopping_cart_items_dict = [item.to_dict() for item in all_shopping_cart_items]
-    response = make_response(jsonify(shopping_cart_items_dict), 200)
+    response = make_response(jsonify(all_shopping_cart_items), 200)
     return response 
 
 @app.route("/shoppingcart/<int:id>" ,methods=["DELETE"])
