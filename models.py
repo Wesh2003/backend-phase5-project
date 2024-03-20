@@ -31,7 +31,7 @@ class Product(db.Model):
     # wishlist_id = db.Column(db.Integer, db.ForeignKey("wishlists.id"))
 
     shoppingcarts = relationship('ShoppingCart', backref='product')
-    reviews = relationship('Review', backref='product')
+    # reviews = relationship('Review', backref='product')
     receipts = db.relationship('Receipt', secondary=product_receipts, backref='product')
     wishlists = relationship("Wishlist", back_populates="product")
 
@@ -64,6 +64,7 @@ class Review(db.Model):
 
     # Define the relationship with User more clearly for multiple reviews
     user = relationship('User', backref='reviews')
+    product = relationship('Product', backref='reviews')
 
     def __repr__(self):
         return f"Review(ID: {self.id}, Rating: {self.rating}, Posted: {self.created_at})"
@@ -76,7 +77,8 @@ class Review(db.Model):
             "product_id": self.product_id,
             "user_id": self.user_id,
             "created_at":self.created_at,
-            "name":self.user.name
+            "username":self.user.name,
+            "product_name": self.product.name
             }
 
 class User(db.Model):
