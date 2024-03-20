@@ -20,8 +20,8 @@ app = Flask(
     __name__,
     )
 # bcrypt= Bcrypt(app)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shoppingDatabase.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shoppingDatabase.db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -471,42 +471,6 @@ def add_receipt():
         # Return an error response if something goes wrong
         return jsonify({'error': str(e)}), 400
 
-
-    
-
-@app.route("/shoppingcart" ,methods=["POST"])
-def  add_to_cart():
-    data = request.get_json()
-    product_id = data.get('product_id')
-    user_id = data.get('user_id')
-
-    try:
-        new_cart_item = ShoppingCart(product_id = product_id, user_id = user_id)
-        db.session.add(new_cart_item)
-        db.session.commit()
-
-        new_cart_item_dict = new_cart_item.to_dict()
-        response = make_response(jsonify(new_cart_item_dict), 200)
-        return response 
-    
-    except Exception as e:
-        response = make_response({'error': str(e)}, 400)
-        return response
-    
-@app.route("/shoppingcart" ,methods=["GET"])
-def display_products_in_cart():
-    all_shopping_cart_items = ShoppingCart.query.all()
-    shopping_cart_items_dict = [item.to_dict() for item in all_shopping_cart_items]
-    response = make_response(jsonify(shopping_cart_items_dict), 200)
-    return response 
-
-@app.route("/shoppingcart/<int:id>" ,methods=["DELETE"])
-def delete_shopping_cart_item(id):
-    item = ShoppingCart.query.filter_by(id=id).first()
-    db.session.delete(item)
-    db.session.commit()
-    response =  make_response("Item deleted", 200)
-    return response  
 
 
 
