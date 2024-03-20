@@ -64,7 +64,7 @@ class Review(db.Model):
 
     # Define the relationship with User more clearly for multiple reviews
     user = relationship('User', backref='reviews')
-    product = relationship('Product')
+    product = relationship('Product', backref='reviews')
 
     def __repr__(self):
         return f"Review(ID: {self.id}, Rating: {self.rating}, Posted: {self.created_at})"
