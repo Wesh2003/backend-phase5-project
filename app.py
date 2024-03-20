@@ -83,21 +83,30 @@ def user_by_name(name):
         return jsonify(response), 500
 @app.route('/users/<int:id>', methods=['GET'])
 def user_by_id(id):
-    user = User.query.filter_by(id=id).first()
     try:
+        # Attempt to retrieve the user by ID from the database
+        user = User.query.get(id)
+        
+        # Check if the user exists
         if user:
+            # User found, create the response
             response = {
                 "name": user.name,
                 "id": user.id,
                 "email": user.email,
                 "phone": user.phone
             }
+            # Return the response with status code 200 (OK)
             return jsonify(response), 200
         else:
+            # User not found, create the error response
             response = {"error": "No such user"}
+            # Return the error response with status code 404 (Not Found)
             return jsonify(response), 404
     except Exception as e:
+        # An unexpected error occurred, create the error response
         response = {"error": str(e)}
+        # Return the error response with status code 500 (Internal Server Error)
         return jsonify(response), 500
 
     
