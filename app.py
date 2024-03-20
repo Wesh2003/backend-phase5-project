@@ -191,11 +191,11 @@ def remove_from_wishlists():
 @app.route('/wishlists/<int:id>', methods=['GET'])
 def get_wishlist_products():
 
-    # if 'user_id' not in session:
-    #     return jsonify({'error': 'User not logged in'}), 401
+    if 'user_id' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
 
-    # user_id = session['user_id']
-    user_id = 1
+    user_id = session['user_id']
+    
     
     user_wishlist = Wishlist.query.filter_by(user_id=user_id).all()
 
