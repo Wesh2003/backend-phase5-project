@@ -100,7 +100,7 @@ def user_by_name(name):
 
 @app.route('/users/<int:id>', methods=['GET'])
 @jwt_required()
-def user_by_id(id):
+def user_by_id(self):
     try:
         current_user_id = get_jwt_identity()
         # Attempt to retrieve the user by ID from the database
