@@ -75,7 +75,8 @@ class Review(db.Model):
             "description":self.description,
             "product_id": self.product_id,
             "user_id": self.user_id,
-            "created_at":self.created_at
+            "created_at":self.created_at,
+            "name":self.user.name
             }
 
 class User(db.Model):
