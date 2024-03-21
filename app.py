@@ -265,11 +265,8 @@ def remove_from_wishlists():
     return jsonify({'message': 'Product removed from wishlist successfully'}), 200
     
 
-@app.route('/wishlists/<int:id>', methods=['GET'])
-
+@app.route('/wishlists/<int:user_id>', methods=['GET'])
 def get_wishlist_products(user_id):
-
-
     # Retrieve the user from the database based on the user ID
     user = User.query.get(user_id)
 
@@ -292,8 +289,6 @@ def get_wishlist_products(user_id):
         })
 
     return jsonify({'wishlist': wishlist_data}), 200
-
-
     
 
 # @app.route("/" ,methods=["GET"])
