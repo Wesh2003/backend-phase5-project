@@ -6,7 +6,7 @@ from werkzeug.exceptions import NotFound
 from models import db, User, ShoppingCart, Receipt, Wishlist
 from auth import Auth
 import os
-# from flask_cors import CORS
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 # from flask_Bcrypt import Bcrypt
 # from dotenv import load_dotenv
@@ -24,7 +24,7 @@ app = Flask(
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 
 
@@ -265,11 +265,8 @@ def remove_from_wishlists():
     return jsonify({'message': 'Product removed from wishlist successfully'}), 200
     
 
-@app.route('/wishlists/<int:id>', methods=['GET'])
-
+@app.route('/wishlists/<int:user_id>', methods=['GET'])
 def get_wishlist_products(user_id):
-
-
     # Retrieve the user from the database based on the user ID
     user = User.query.get(user_id)
 
@@ -292,8 +289,6 @@ def get_wishlist_products(user_id):
         })
 
     return jsonify({'wishlist': wishlist_data}), 200
-
-
     
 
 # @app.route("/" ,methods=["GET"])
