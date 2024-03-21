@@ -223,7 +223,7 @@ def get_products():
 @app.route('/wishlists/add', methods=['POST'])
 def add_to_wishlists():
     # Retrieve user_id from the request JSON
-    user_id = request.json.get('user_id')
+    user_id = request.json.get('userId')
 
     # Check if the user exists
     user = User.query.get(user_id)
@@ -266,7 +266,10 @@ def remove_from_wishlists():
     
 
 @app.route('/wishlists/<int:user_id>', methods=['GET'])
+
 def get_wishlist_products(user_id):
+
+
     # Retrieve the user from the database based on the user ID
     user = User.query.get(user_id)
 
