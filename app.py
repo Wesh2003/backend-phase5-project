@@ -47,8 +47,8 @@ class Users(Resource):
         current_user_id = get_jwt_identity
         user = User.query.filter_by(id=current_user_id).first()
         if user:
-            # response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
-            return make_response(jsonify(user.serialize), 200)
+            response = {'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} 
+            return make_response(jsonify(response), 200)
         else:
             return {"error":"user not found"}, 
     def post(self):    
