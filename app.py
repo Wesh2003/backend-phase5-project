@@ -57,8 +57,8 @@ class Users(Resource):
 
         if email and password:
             # Query the database using the email
-            user = User.query.filter_by(email).first()
-            # id = user.id
+            user = User.query.filter_by(email=email).first()
+            
 
             if user and password:
                 # Assuming user.id is the user ID
