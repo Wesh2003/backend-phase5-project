@@ -57,12 +57,13 @@ class Users(Resource):
 
         if email and password:
             # Query the database using the email
-            user = User.query.filter_by(email=email).first()
+            user = User.query.filter_by(email).first()
+            # id = user.id
 
             if user and password:
                 # Assuming user.id is the user ID
                 access_token = create_access_token(identity=user.email)
-                return {'user_id': user.id, 'access_token': access_token}, 200
+                return {'access_token': access_token , 'id': user.id}, 200
             else:
                 return {'message': "Invalid credentials"}, 401
         else:
