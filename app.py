@@ -6,7 +6,7 @@ from werkzeug.exceptions import NotFound
 from models import db, User, ShoppingCart, Receipt, Wishlist
 from auth import Auth
 import os
-from flask_cors import CORS
+# from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 # from flask_Bcrypt import Bcrypt
 # from dotenv import load_dotenv
@@ -24,7 +24,7 @@ app = Flask(
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+# CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 
 
