@@ -132,18 +132,18 @@ class Wishlist(db.Model):
     user = relationship('User', back_populates='wishlists')
     product = relationship('Product', back_populates='wishlists')
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'product_id': self.product_id,
-            'user_id': self.user_id
-            # "name": self.product.name,
-            # "description": self.product.description,
-            # "price": self.product.price,
-            # "quantity": self.product.quantity,
-            # "category": self.product.category
-            # Add more attributes if needed
-        }
+    # def to_dict(self):
+    #     return {
+    #         'id': self.id,
+    #         'product_id': self.product_id,
+    #         'user_id': self.user_id
+    #         # "name": self.product.name,
+    #         # "description": self.product.description,
+    #         # "price": self.product.price,
+    #         # "quantity": self.product.quantity,
+    #         # "category": self.product.category
+    #         # Add more attributes if needed
+    #     }
 
 class Admin(db.Model):
     __tablename__ = 'admins'
