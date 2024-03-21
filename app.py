@@ -528,36 +528,28 @@ class Cart(Resource):
         except Exception as e:
             return make_response({'error': str(e)}, 500)
         
-@app.route('/shoppingcart/<int:id>')
-def get( id):
-    try:
-        # Fetch the specific shopping cart item by its ID
-        shopping_cart_item = ShoppingCart.query.get(id)
+
+@app.route('/shoppingcart/<int:id>', methods=['GET'])
+def get_shopping_products(id):
+    # Retrieve the shopping cart items for the specified user
+    cart = ShoppingCart.query.filter_by(user_id=id).all()
+
+    cart_data = []
+    for item in cart:
+        product = Product.query.get(item.product_id)
+        if product:
+            cart_data.append({
+                'product_id': product.id,
+                'name': product.name,
+                'description': product.description,
+                'price': product.price,
+                'image_url': product.image_url
+            })
+
+    return jsonify({'cart': cart_data}), 200
+
+
         
-        # Check if the shopping cart item exists
-        if shopping_cart_item:
-            # Include product details in the response
-            product = Product.query.get(shopping_cart_item.product_id)
-            if product:
-                shopping_cart_item_dict = shopping_cart_item.to_dict()
-                shopping_cart_item_dict['product'] = {
-                    'id': product.id,
-                    'name': product.name,
-                    'description': product.description,
-                    'category': product.category,
-                    'image_url': product.image_url,
-                    'price': product.price,
-                    'onstock': product.onstock,
-                    'rating': product.rating
-                }
-                return jsonify(shopping_cart_item_dict), 200
-            else:
-                return jsonify({'error': 'Product not found'}), 404
-        else:
-            return jsonify({'error': 'Shopping cart item not found'}), 404
-        
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
   
 @app.route("/receipt/last", methods=["GET"])
 def get_last_receipt():
