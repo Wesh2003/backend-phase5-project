@@ -439,16 +439,18 @@ class Cart(Resource):
     def post(self):
         try:
             data = request.get_json()
+            product_id = data.get('product_id')
+            user_id = data.get('user_id')
 
             # Validate input data
-            if 'product_id' not in data or 'user_id' not in data:
+            if not product_id or not user_id:
                 raise ValueError("Both 'product_id' and 'user_id' are required.")
             
-            product_id = data['product_id']
-            user_id = data['user_id']
+            
 
             # Create new Cart object
             new_cart_item = ShoppingCart(product_id=product_id, user_id=user_id)
+            product = Product.query.filter_by(id=product_id).first()
             
             # Add new item to the database
             new_shopping_cart_item = ShoppingCart(product_id=new_cart_item.product_id, user_id=new_cart_item.user_id)
@@ -458,7 +460,17 @@ class Cart(Resource):
             # Prepare response
             new_cart_item_dict = {
                 "product_id": new_cart_item.product_id,
-                "user_id": new_cart_item.user_id
+                "user_id": new_cart_item.user_id,
+                "product":{
+                        'name': product.name,
+                        'description': product.description,
+                        'category': product.category,
+                        'image_url': product.image_url,
+                        'price': product.price,
+                        'onstock': product.onstock,
+                        'rating': product.rating
+
+                }
             }
             response = jsonify(new_cart_item_dict)
             response.status_code = 200
@@ -478,12 +490,28 @@ class Cart(Resource):
         try:
             all_shopping_cart_items = ShoppingCart.query.all()
             shopping_cart_items_dict = [item.to_dict() for item in all_shopping_cart_items]
-            response = make_response(jsonify(shopping_cart_items_dict), 200)
-            return response 
+            
+            # Include product details in the response
+            shopping_cart_items_with_products = []
+            for item in shopping_cart_items_dict:
+                product = Product.query.get(item['product_id'])
+                if product:
+                    item['product'] = {
+                        'id': product.id,
+                        'name': product.name,
+                        'description': product.description,
+                        'category': product.category,
+                        'image_url': product.image_url,
+                        'price': product.price,
+                        'onstock': product.onstock,
+                        'rating': product.rating
+                    }
+                shopping_cart_items_with_products.append(item)
+            
+            return jsonify(shopping_cart_items_with_products), 200
         
         except Exception as e:
             return make_response({'error': str(e)}, 500)
-
     def delete(self, id):
         try:
             item = ShoppingCart.query.filter_by(id=id).first()
@@ -499,7 +527,7 @@ class Cart(Resource):
   
 @app.route("/receipt/last", methods=["GET"])
 def get_last_receipt():
-    last_receipt = Receipt.query.order_by(desc(Receipt.id)).first()
+    last_receipt = Receipt.query.order_by(min(Receipt.id)).first()
 
     if last_receipt:
         return jsonify(last_receipt.to_dict()), 200
