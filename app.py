@@ -223,7 +223,7 @@ def get_products():
 @app.route('/wishlists/add', methods=['POST'])
 def add_to_wishlists():
     # Retrieve user_id from the request JSON
-    user_id = request.json.get('user_id')
+    user_id = request.json.get('userId')
 
     # Check if the user exists
     user = User.query.get(user_id)
@@ -265,8 +265,11 @@ def remove_from_wishlists():
     return jsonify({'message': 'Product removed from wishlist successfully'}), 200
     
 
-@app.route('/wishlists/<int:user_id>', methods=['GET'])
+@app.route('/wishlists/<int:id>', methods=['GET'])
+
 def get_wishlist_products(user_id):
+
+
     # Retrieve the user from the database based on the user ID
     user = User.query.get(user_id)
 
@@ -524,6 +527,37 @@ class Cart(Resource):
         
         except Exception as e:
             return make_response({'error': str(e)}, 500)
+        
+@app.route('/shoppingcart/<int:id>')
+def get( id):
+    try:
+        # Fetch the specific shopping cart item by its ID
+        shopping_cart_item = ShoppingCart.query.get(id)
+        
+        # Check if the shopping cart item exists
+        if shopping_cart_item:
+            # Include product details in the response
+            product = Product.query.get(shopping_cart_item.product_id)
+            if product:
+                shopping_cart_item_dict = shopping_cart_item.to_dict()
+                shopping_cart_item_dict['product'] = {
+                    'id': product.id,
+                    'name': product.name,
+                    'description': product.description,
+                    'category': product.category,
+                    'image_url': product.image_url,
+                    'price': product.price,
+                    'onstock': product.onstock,
+                    'rating': product.rating
+                }
+                return jsonify(shopping_cart_item_dict), 200
+            else:
+                return jsonify({'error': 'Product not found'}), 404
+        else:
+            return jsonify({'error': 'Shopping cart item not found'}), 404
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
   
 @app.route("/receipt/last", methods=["GET"])
 def get_last_receipt():
