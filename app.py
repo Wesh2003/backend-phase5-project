@@ -29,7 +29,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
-app.config['JWT_SECRET_KEY'] = 'aec889f7f5b11e6ca2de8739ad202d5d4ce716cf377cc07d'
+# app.config['JWT_SECRET_KEY'] = 'aec889f7f5b11e6ca2de8739ad202d5d4ce716cf377cc07d'
 
 jwt = JWTManager(app)
 
@@ -124,19 +124,17 @@ def user_by_name(name):
         return jsonify(response), 500
 
 @app.route('/users/<int:id>', methods=['GET'])
-@jwt_required()
-def user_by_id(self):
+def user_by_id(id):
     try:
-        current_user_id = get_jwt_identity()
         # Attempt to retrieve the user by ID from the database
-        user = User.query.get(id=current_user_id).first()
-        
+        user = User.query.get(id)
+
         # Check if the user exists
         if user:
             # User found, create the response
             response = {
-                "name": user.name,
                 "id": user.id,
+                "name": user.name,
                 "email": user.email,
                 "phone": user.phone
             }
@@ -147,6 +145,11 @@ def user_by_id(self):
             response = {"error": "No such user"}
             # Return the error response with status code 404 (Not Found)
             return jsonify(response), 404
+    except Exception as e:
+        # Handle any exceptions that occur during processing
+        print(e)  # Print the exception for debugging purposes
+        response = {"error": "An error occurred"}
+        return jsonify(response), 500
     except Exception as e:
         # An unexpected error occurred, create the error response
         response = {"error": str(e)}
@@ -445,7 +448,7 @@ class Cart(Resource):
             user_id = data['user_id']
 
             # Create new Cart object
-            new_cart_item = Cart(product_id=product_id, user_id=user_id)
+            new_cart_item = ShoppingCart(product_id=product_id, user_id=user_id)
             
             # Add new item to the database
             new_shopping_cart_item = ShoppingCart(product_id=new_cart_item.product_id, user_id=new_cart_item.user_id)
