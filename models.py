@@ -136,7 +136,12 @@ class Wishlist(db.Model):
         return {
             'id': self.id,
             'product_id': self.product_id,
-            'user_id': self.user_id
+            'user_id': self.user_id,
+            "name": self.product.name,
+            "description": self.product.description,
+            "price": self.product.price,
+            "quantity": self.product.quantity,
+            "category": self.product.category
             # Add more attributes if needed
         }
 
