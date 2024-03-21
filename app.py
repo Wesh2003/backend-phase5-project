@@ -24,11 +24,13 @@ app = Flask(
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 
 
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
+# app.config['JWT_SECRET_KEY'] = 'aec889f7f5b11e6ca2de8739ad202d5d4ce716cf377cc07d'
+
 jwt = JWTManager(app)
 
 migrate = Migrate(app, db)
@@ -42,26 +44,65 @@ def home():
     return 'Shop Mate'
 
 class Users(Resource):
+    @jwt_required()
     def get(self):
-        users = User.query.all()
-        response = [{'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} for user in users]
-        return make_response(jsonify(response))
-    def post(self):
+        current_user_id = get_jwt_identity
+        user = User.query.filter_by(id=current_user_id).first()
+        if user:
+            response = {'id': user.id, 'phone': user.phone, 'name': user.name ,'email': user.email} 
+            return make_response(jsonify(response), 200)
+        else:
+            return {"error":"user not found"}, 
+    def post(self):    
         email = request.json.get('email')
         password = request.json.get('password')
 
         if email and password:
             # Query the database using the email
             user = User.query.filter_by(email=email).first()
+            
 
             if user and password:
                 # Assuming user.id is the user ID
                 access_token = create_access_token(identity=user.email)
-                return {'user_id': user.id, 'access_token': access_token}, 200
+                return {'access_token': access_token , 'id': user.id}, 200
             else:
                 return {'message': "Invalid credentials"}, 401
         else:
             return {'message': "Invalid credentials"}, 401
+# app.route('/login', methods=['GET'])
+# def post(self):
+#         data = request.get_json()
+#         name = data.get('username')
+#         password = data.get('password')       
+#         user = User.query.filter_by(name).first()
+#         if user and password:
+#                 access_token = create_access_token(identity=user.name)
+#                 return {'access_token': access_token , 'id': user.id}, 200
+#         else:
+#                 return {"message": "invalid credentials"}, 401
+
+
+@app.route("/users", methods=["GET"])
+def get_users():
+    try:
+        # Retrieve all users from the database
+        users = User.query.all()
+        
+        # Serialize the users data into a list of dictionaries
+        users_data = [{
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "phone": user.phone
+            # Add more fields as needed
+        } for user in users]
+
+        # Return the list of users as JSON response
+        return jsonify(users_data), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/users/<string:name>', methods=['GET'])
 def user_by_name(name):
@@ -80,6 +121,39 @@ def user_by_name(name):
             return jsonify(response), 404
     except Exception as e:
         response = {"error": str(e)}
+        return jsonify(response), 500
+
+@app.route('/users/<int:id>', methods=['GET'])
+def user_by_id(id):
+    try:
+        # Attempt to retrieve the user by ID from the database
+        user = User.query.get(id)
+
+        # Check if the user exists
+        if user:
+            # User found, create the response
+            response = {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "phone": user.phone
+            }
+            # Return the response with status code 200 (OK)
+            return jsonify(response), 200
+        else:
+            # User not found, create the error response
+            response = {"error": "No such user"}
+            # Return the error response with status code 404 (Not Found)
+            return jsonify(response), 404
+    except Exception as e:
+        # Handle any exceptions that occur during processing
+        print(e)  # Print the exception for debugging purposes
+        response = {"error": "An error occurred"}
+        return jsonify(response), 500
+    except Exception as e:
+        # An unexpected error occurred, create the error response
+        response = {"error": str(e)}
+        # Return the error response with status code 500 (Internal Server Error)
         return jsonify(response), 500
 
     
@@ -105,7 +179,7 @@ def register():
     data = request.get_json()
 
    
-    name = data.get('username')
+    name = data.get('name')
     email = data.get('email')
     password = data.get('password')
     phone = data.get('phone')
@@ -144,16 +218,17 @@ def get_products():
         
         products_list.append(product_dict)
     response = make_response(jsonify(products_list),200)
-    return response 
-
-
+    return response
+# Modify add_to_wishlists endpoint
 @app.route('/wishlists/add', methods=['POST'])
 def add_to_wishlists():
+    # Retrieve user_id from the request JSON
+    user_id = request.json.get('user_id')
 
-    if 'user_id' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
-
-    user_id = session['user_id']
+    # Check if the user exists
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
 
     product_id = request.json.get('product_id')
     product = Product.query.get(product_id)
@@ -169,7 +244,6 @@ def add_to_wishlists():
     db.session.commit()
 
     return jsonify({'message': 'Product added to wishlist successfully'}), 201
-
 
 @app.route('/wishlists/remove', methods=['DELETE'])
 def remove_from_wishlists():
@@ -191,17 +265,17 @@ def remove_from_wishlists():
     return jsonify({'message': 'Product removed from wishlist successfully'}), 200
     
 
-@app.route('/wishlists/<int:id>', methods=['GET'])
-def get_wishlist_products():
+@app.route('/wishlists/<int:user_id>', methods=['GET'])
+def get_wishlist_products(user_id):
+    # Retrieve the user from the database based on the user ID
+    user = User.query.get(user_id)
 
-    if 'user_id' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
+    # Check if the user exists
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
 
-    user_id = session['user_id']
-    
-    
+    # Retrieve the wishlist items for the specified user
     user_wishlist = Wishlist.query.filter_by(user_id=user_id).all()
-
 
     wishlist_data = []
     for item in user_wishlist:
@@ -216,6 +290,7 @@ def get_wishlist_products():
 
     return jsonify({'wishlist': wishlist_data}), 200
 
+
     
 
 # @app.route("/" ,methods=["GET"])
@@ -229,20 +304,10 @@ def get_wishlist_products():
 
 @app.route('/reviews', methods=['GET'])
 def get_reviews():
-    reviews = Review.query.all()
-    review_list = []
-    for review in reviews:
-        review_dic={
-            'id': review.id,
-            'description': review.description,
-            'rating': review.rating,
-            'created_at': review.created_at,
-            'product_id': review.product_id,
-            'user_id': review.user_id
-        }
-        review_list.append(review_dic)
-    ans = make_response(jsonify(review_list),200)
-    return ans
+    all_reviews = Review.query.all()
+    review_dict= [review.to_dict() for review in all_reviews]
+    response= make_response(jsonify(review_dict), 200)
+    return response
 
 @app.route('/products', methods=["PATCH"])
 
@@ -271,31 +336,42 @@ def create_review():
     product_id = data.get("product_id")
     user_id = data.get("user_id")
     
-    if not all([description, rating, product_id, user_id]):
-        return jsonify({"error": "Missing fields!"}), 400
+    try:
+        new_review= Review(description = description, rating= rating, product_id = product_id, user_id= user_id)
+        db.session.add(new_review)
+        db.session.commit()
+
+        new_review_dict= new_review.to_dict()
+        response = make_response(jsonify(new_review_dict), 200)
+        return response
+    except Exception as e:
+        response= make_response({'error': str(e)}, 400)
+        return response
+    # if not all([description, rating, product_id, user_id]):
+    #     return jsonify({"error": "Missing fields!"}), 400
 
     # Create a new review object
-    new_review = Review(
-        description=description,
-        rating=rating,
-        product_id=product_id,
-        user_id=user_id
-    )
+    # new_review = Review(
+    #     description=description,
+    #     rating=rating,
+    #     product_id=product_id,
+    #     user_id=user_id
+    # )
 
-    db.session.add(new_review)
-    db.session.commit()
+    # db.session.add(new_review)
+    # db.session.commit()
 
-    review_details = {
-        "id": new_review.id,
-        "description": new_review.description,
-        "rating": new_review.rating,
-        "created_at": new_review.created_at.isoformat(),
-        "product_id": new_review.product_id,
-        "user_id": new_review.user_id
-    }
+    # review_details = {
+    #     "id": new_review.id,
+    #     "description": new_review.description,
+    #     "rating": new_review.rating,
+    #     "created_at": new_review.created_at.isoformat(),
+    #     "product_id": new_review.product_id,
+    #     "user_id": new_review.user_id
+    # }
 
-    ans = make_response(jsonify(review_details),200)
-    return ans
+    # ans = make_response(jsonify(review_details),200)
+    # return ans
         
        
          
@@ -359,130 +435,124 @@ def update_review(review_id):
     ans = make_response(jsonify(review_details))
     return ans
 
-@app.route("/shoppingcart", methods=["POST"])
-def add_to_cart():
-    try:
-        data = request.get_json()
+class Cart(Resource):
+    def post(self):
+        try:
+            data = request.get_json()
 
-        # Validate input data
-        if 'product_id' not in data or 'user_id' not in data:
-            raise ValueError("Both 'product_id' and 'user_id' are required.")
+            # Validate input data
+            if 'product_id' not in data or 'user_id' not in data:
+                raise ValueError("Both 'product_id' and 'user_id' are required.")
+            
+            product_id = data['product_id']
+            user_id = data['user_id']
+
+            # Create new Cart object
+            new_cart_item = ShoppingCart(product_id=product_id, user_id=user_id)
+            
+            # Add new item to the database
+            new_shopping_cart_item = ShoppingCart(product_id=new_cart_item.product_id, user_id=new_cart_item.user_id)
+            db.session.add(new_shopping_cart_item)
+            db.session.commit()
+
+            # Prepare response
+            new_cart_item_dict = {
+                "product_id": new_cart_item.product_id,
+                "user_id": new_cart_item.user_id
+            }
+            response = jsonify(new_cart_item_dict)
+            response.status_code = 200
+            return response 
         
-        product_id = data['product_id']
-        user_id = data['user_id']
-
-        # Create new ShoppingCart object
-        new_cart_item = ShoppingCart(product_id=product_id, user_id=user_id)
+        except KeyError as e:
+            error_message = f"Missing key: {e}"
+            return make_response({'error': error_message}, 400)
         
-        # Add new item to the database
-        db.session.add(new_cart_item)
-        db.session.commit()
+        except ValueError as e:
+            return make_response({'error': str(e)}, 400)
+        
+        except Exception as e:
+            return make_response({'error': str(e)}, 500)
 
-        # Prepare response
-        new_cart_item_dict = new_cart_item.to_dict()
-        response = jsonify(new_cart_item_dict)
-        response.status_code = 200
-        return response 
-    
-    except KeyError as e:
-        error_message = f"Missing key: {e}"
-        return make_response({'error': error_message}, 400)
-    
-    except ValueError as e:
-        return make_response({'error': str(e)}, 400)
-    
-    except Exception as e:
-        return make_response({'error': str(e)}, 500)
+    def get(self):
+        try:
+            all_shopping_cart_items = ShoppingCart.query.all()
+            shopping_cart_items_dict = [item.to_dict() for item in all_shopping_cart_items]
+            response = make_response(jsonify(shopping_cart_items_dict), 200)
+            return response 
+        
+        except Exception as e:
+            return make_response({'error': str(e)}, 500)
 
-@app.route("/shoppingcart" ,methods=["GET"])
-def display_products_in_cart():
-    all_shopping_cart_items = ShoppingCart.query.all()
-    shopping_cart_items_dict = [item.to_dict() for item in all_shopping_cart_items]
-    response = make_response(jsonify(shopping_cart_items_dict), 200)
-    return response 
-
-@app.route("/shoppingcart/<int:id>" ,methods=["DELETE"])
-def delete_shopping_cart_item(id):
-    item = ShoppingCart.query.filter_by(id=id).first()
-    db.session.delete(item)
-    db.session.commit()
-    response =  make_response("Item deleted", 200)
-    return response
+    def delete(self, id):
+        try:
+            item = ShoppingCart.query.filter_by(id=id).first()
+            if item:
+                db.session.delete(item)
+                db.session.commit()
+                return make_response("Item deleted", 200)
+            else:
+                return make_response("Item not found", 404)
+        
+        except Exception as e:
+            return make_response({'error': str(e)}, 500)
   
-@app.route("/receipt", methods = ["GET" ])
+@app.route("/receipt/last", methods=["GET"])
+def get_last_receipt():
+    last_receipt = Receipt.query.order_by(desc(Receipt.id)).first()
 
+    if last_receipt:
+        return jsonify(last_receipt.to_dict()), 200
+    else:
+        return jsonify({"message": "No receipts found"}), 404
 
+@app.route("/receipt", methods=["GET"])
+def get_all_receipts():
+    all_receipts = Receipt.query.all()
+    receipt_dict= [receipt.to_dict() for receipt in all_receipts]
+    response= make_response(jsonify(receipt_dict), 200)
+    return response
 
 @app.route('/receipt', methods=['POST'])
 def add_receipt():
     data = request.json
     
     # Extract receipt details from the request JSON
-    details = data.get('details')
+    delivery_address = data.get('delivery_address')
+    city = data.get('city')
     user_id = data.get('user_id')
 
-    if not details or not user_id:
-        return jsonify({'error': 'Both details and user_id are required.'}), 400
-    
-    created_at = datetime.now()
-
     try:
-        # Create a new Receipt object
-        new_receipt = Receipt(details=details, created_at=created_at, user_id=user_id)
-        
-        # Add the new receipt to the database
+        new_receipt= Receipt(delivery_address=delivery_address, city=city, user_id=user_id)
         db.session.add(new_receipt)
         db.session.commit()
 
-        # Return a success response
-        return jsonify({'message': 'Receipt added successfully'}), 201
+        new_receipt_dict= new_receipt.to_dict()
+        response = make_response(jsonify(new_receipt_dict), 200)
+        return response
+    except Exception as e:
+        response= make_response({'error': str(e)}, 400)
+        return response
     
     except Exception as e:
         # Return an error response if something goes wrong
         return jsonify({'error': str(e)}), 400
 
-
-    
-
-@app.route("/shoppingcart" ,methods=["POST"])
-def  add_to_cart():
-    data = request.get_json()
-    product_id = data.get('product_id')
-    user_id = data.get('user_id')
-
-    try:
-        new_cart_item = ShoppingCart(product_id = product_id, user_id = user_id)
-        db.session.add(new_cart_item)
+@app.route('/receipt/<int:receipt_id>', methods=['DELETE'])
+def delete_receipt(receipt_id):
+    receipt = Receipt.query.get(receipt_id)
+    if receipt:
+        db.session.delete(receipt)
         db.session.commit()
-
-        new_cart_item_dict = new_cart_item.to_dict()
-        response = make_response(jsonify(new_cart_item_dict), 200)
-        return response 
-    
-    except Exception as e:
-        response = make_response({'error': str(e)}, 400)
-        return response
-    
-@app.route("/shoppingcart" ,methods=["GET"])
-def display_products_in_cart():
-    all_shopping_cart_items = ShoppingCart.query.all()
-    shopping_cart_items_dict = [item.to_dict() for item in all_shopping_cart_items]
-    response = make_response(jsonify(shopping_cart_items_dict), 200)
-    return response 
-
-@app.route("/shoppingcart/<int:id>" ,methods=["DELETE"])
-def delete_shopping_cart_item(id):
-    item = ShoppingCart.query.filter_by(id=id).first()
-    db.session.delete(item)
-    db.session.commit()
-    response =  make_response("Item deleted", 200)
-    return response  
-
+        return jsonify(message='Receipt deleted successfully'), 200
+    else:
+        return jsonify(message='Receipt not found'), 404
 
 
     
 
 api.add_resource(Users, "/users")
+api.add_resource(Cart, "/shoppingcart")
 
 if __name__ == '__main__':
     app.run(port = 5555, debug = True)
