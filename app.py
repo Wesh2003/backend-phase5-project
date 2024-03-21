@@ -80,6 +80,28 @@ class Users(Resource):
 #         else:
 #                 return {"message": "invalid credentials"}, 401
 
+
+@app.route("/users", methods=["GET"])
+def get_users():
+    try:
+        # Retrieve all users from the database
+        users = User.query.all()
+        
+        # Serialize the users data into a list of dictionaries
+        users_data = [{
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "phone": user.phone
+            # Add more fields as needed
+        } for user in users]
+
+        # Return the list of users as JSON response
+        return jsonify(users_data), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/users/<string:name>', methods=['GET'])
 def user_by_name(name):
     user = User.query.filter_by(name=name).first()
