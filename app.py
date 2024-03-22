@@ -219,7 +219,7 @@ def get_products():
         products_list.append(product_dict)
     response = make_response(jsonify(products_list),200)
     return response
-# Modify add_to_wishlists endpoint
+
 @app.route('/wishlists/add', methods=['POST'])
 def add_to_wishlists():
     # Retrieve user_id from the request JSON
@@ -246,26 +246,25 @@ def add_to_wishlists():
     db.session.commit()
 
     return jsonify({'message': 'Product added to wishlist successfully'}), 201
+@app.route('/wishlists/remove/<int:product_id>', methods=['DELETE'])
+def remove_from_wishlist(product_id):
+    # Retrieve the user ID from the request JSON
+    user_id = request.json.get('user_id')
 
-@app.route('/wishlists/remove', methods=['DELETE'])
-def remove_from_wishlists():
-    if 'user_id' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
+    # Check if the user ID is provided
+    if not user_id:
+        return jsonify({'error': 'User ID not provided'}), 400
 
-    user_id = session['user_id']
-
-    
-    product_id = request.json.get('product_id')
-
+    # Check if the product exists in the wishlist
     wishlist_item = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first()
     if not wishlist_item:
         return jsonify({'error': 'Product not found in wishlist'}), 404
 
+    # Delete the wishlist item from the database
     db.session.delete(wishlist_item)
     db.session.commit()
 
     return jsonify({'message': 'Product removed from wishlist successfully'}), 200
-    
 
 @app.route('/wishlists/<int:user_id>', methods=['GET'])
 def get_wishlist_products(user_id):
