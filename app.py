@@ -543,6 +543,18 @@ def get_shopping_products(id):
 
     return jsonify({'cart': cart_data}), 200
 
+@app.route('/shoppingcarts/<int:product_id>', methods=['DELETE'])
+def delete_product(product_id):
+    product = ShoppingCart.query.get(product_id)
+    if product:
+        db.session.delete(product)
+        db.session.commit()
+        return jsonify(message='Product deleted successfully'), 200
+    else:
+        return jsonify(message='Product not found'), 404
+
+
+
 
         
   
