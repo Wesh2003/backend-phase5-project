@@ -223,7 +223,9 @@ def get_products():
 @app.route('/wishlists/add', methods=['POST'])
 def add_to_wishlists():
     # Retrieve user_id from the request JSON
+
     user_id = request.json.get('userId') or request.json.get('user_id')
+
 
     # Check if the user exists
     user = User.query.get(user_id)
