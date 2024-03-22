@@ -230,12 +230,12 @@ def add_to_wishlists():
     # Check if the user exists
     user = User.query.get(user_id)
     if not user:
-        return jsonify({'error': 'User not found'}), 404
+        return jsonify({'message': 'User not found'}), 404
 
     product_id = request.json.get('product_id')
     product = Product.query.get(product_id)
     if not product:
-        return jsonify({'error': 'Product not found'}), 404
+        return jsonify({'message': 'Product not found'}), 404
 
     existing_wishlist_item = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first()
     if existing_wishlist_item:
@@ -253,12 +253,12 @@ def remove_from_wishlist(product_id):
 
     # Check if the user ID is provided
     if not user_id:
-        return jsonify({'error': 'User ID not provided'}), 400
+        return jsonify({'message': 'User ID not provided'}), 400
 
     # Check if the product exists in the wishlist
     wishlist_item = Wishlist.query.filter_by(user_id=user_id, product_id=product_id).first()
     if not wishlist_item:
-        return jsonify({'error': 'Product not found in wishlist'}), 404
+        return jsonify({'message': 'Product not found in wishlist'}), 404
 
     # Delete the wishlist item from the database
     db.session.delete(wishlist_item)
@@ -273,7 +273,7 @@ def get_wishlist_products(user_id):
 
     # Check if the user exists
     if not user:
-        return jsonify({'error': 'User not found'}), 404
+        return jsonify({'message': 'User not found'}), 404
 
     # Retrieve the wishlist items for the specified user
     user_wishlist = Wishlist.query.filter_by(user_id=user_id).all()
