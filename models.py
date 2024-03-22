@@ -181,10 +181,7 @@ class Receipt(db.Model):
             "delivery_address":self.delivery_address,
             "city":self.city,
             "user_id": self.user_id,
-            "created_at":self.created_at,
-            "name":self.user.name,
-            "email":self.user.email,
-            "phone":self.user.phone
+            "created_at":self.created_at
             }
 
 # class Category(db.Model):
